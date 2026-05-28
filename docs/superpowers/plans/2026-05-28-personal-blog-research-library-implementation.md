@@ -93,6 +93,11 @@ Existing AstroPaper files should remain in place unless a task explicitly change
 
 **Files:**
 - Create: `D:\personal-blog-research-library\docs\design\frontend-design-brief.md`
+- Create: `D:\personal-blog-research-library\docs\design\research-library-design.html`
+- Create: `D:\personal-blog-research-library\docs\design\screenshots\desktop-home.png`
+- Create: `D:\personal-blog-research-library\docs\design\screenshots\desktop-post-detail.png`
+- Create: `D:\personal-blog-research-library\docs\design\screenshots\mobile-home.png`
+- Create: `D:\personal-blog-research-library\docs\design\screenshots\mobile-post-detail.png`
 - External: Figma design file named `Personal Blog Research Library`
 
 - [ ] **Step 1: Initialize the project repository**
@@ -164,11 +169,46 @@ Posts | Topics | Series | Resources | Archives | About | Search
 - Visual style remains close to AstroPaper.
 ```
 
-- [ ] **Step 3: Create the Figma file**
+- [ ] **Step 3: Create the local HTML design file**
 
-Use the Figma tool to create a design file named `Personal Blog Research Library`.
+Create `docs/design/research-library-design.html`.
 
-Expected Figma structure:
+The file must include:
+
+```text
+Design System section
+Desktop Home
+Desktop Posts
+Desktop Post Detail
+Desktop Topic Detail
+Desktop Series Detail
+Desktop Resources
+Desktop Search
+Mobile Home
+Mobile Post Detail
+Mobile Navigation
+```
+
+The HTML design should stay close to AstroPaper: minimal, mostly black/white/gray, readable, no decorative marketing hero.
+
+- [ ] **Step 4: Capture local screenshots**
+
+Use the browser to open `docs/design/research-library-design.html` and capture:
+
+```text
+docs/design/screenshots/desktop-home.png
+docs/design/screenshots/desktop-post-detail.png
+docs/design/screenshots/mobile-home.png
+docs/design/screenshots/mobile-post-detail.png
+```
+
+Expected: screenshots render the design sections with no blank pages or obvious text overlap.
+
+- [ ] **Step 5: Keep Figma as a deferred sync target**
+
+The Figma file exists but is not required to be fully populated while the Starter plan MCP quota is exhausted.
+
+Deferred Figma target structure:
 
 ```text
 Page: Design System
@@ -191,9 +231,9 @@ Page: Mobile
   Frame: Mobile / Navigation / 390x844
 ```
 
-- [ ] **Step 4: Review Figma against the brief**
+- [ ] **Step 6: Review local design against the brief**
 
-Check these items manually in Figma:
+Check these items manually in the local HTML/screenshots:
 
 ```text
 Home shows intro, featured topics, latest posts, recent resources, and series.
@@ -204,13 +244,13 @@ Resources page shows resource type, title, description, topics, tags, and extern
 Mobile navigation is simple and does not use multi-level dropdowns.
 ```
 
-- [ ] **Step 5: Commit the design brief**
+- [ ] **Step 7: Commit the design artifacts**
 
 Run:
 
 ```powershell
-git add docs\design\frontend-design-brief.md
-git commit -m "docs: add frontend design brief"
+git add docs\design
+git commit -m "docs: add local frontend design artifacts"
 ```
 
 Expected: commit succeeds.
