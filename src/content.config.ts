@@ -7,6 +7,9 @@ export const BLOG_PATH = "src/content/posts";
 
 const langSchema = z.enum(["zh", "en"]);
 
+const sameDate = (left?: Date | null, right?: Date | null) =>
+  !left || !right || left.getTime() === right.getTime();
+
 const posts = defineCollection({
   loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: `./${BLOG_PATH}` }),
   schema: ({ image }) =>
@@ -33,6 +36,12 @@ const posts = defineCollection({
       })
       .refine(data => data.date || data.pubDatetime, {
         message: "Post requires either date or pubDatetime",
+      })
+      .refine(data => sameDate(data.date, data.pubDatetime), {
+        message: "Post date and pubDatetime must match when both are provided",
+      })
+      .refine(data => sameDate(data.updated, data.modDatetime), {
+        message: "Post updated and modDatetime must match when both are provided",
       })
       .transform(data => {
         const date = data.date ?? data.pubDatetime ?? new Date(0);
