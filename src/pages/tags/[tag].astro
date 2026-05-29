@@ -1,0 +1,52 @@
+---
+import { getCollection } from "astro:content";
+import ContentList from "@/components/ContentList.astro";
+import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { filterPublicEntries, sortByDateDesc } from "@/utils/researchLibrary";
+
+export async function getStaticPaths() {
+  const posts = filterPublicEntries(await getCollection("posts"));
+  const resources = filterPublicEntries(await getCollection("resources"));
+  const tags = Array.from(
+    new Set([
+      ...posts.flatMap(post => post.data.tags),
+      ...resources.flatMap(resource => resource.data.tags),
+    ])
+  );
+
+  return tags.map(tag => ({
+    params: { tag: encodeURIComponent(tag) },
+    props: { tag },
+  }));
+}
+
+const { tag } = Astro.props;
+const posts = sortByDateDesc(filterPublicEntries(await getCollection("posts")))
+  .filter(post => post.data.tags.includes(tag))
+  .map(post => ({
+    href: `/posts/${post.id}/`,
+    title: post.data.title,
+    description: post.data.description,
+    meta: "Post",
+  }));
+
+const resources = filterPublicEntries(await getCollection("resources"))
+  .filter(resource => resource.data.tags.includes(tag))
+  .map(resource => ({
+    href: `/resources/${resource.id}/`,
+    title: resource.data.title,
+    description: resource.data.description,
+    meta: `Resource / ${resource.data.type}`,
+  }));
+---
+
+<ResearchLibraryLayout title={`Tag: ${tag}`} description="Posts and resources with this tag.">
+  <section class="mb-8">
+    <h2 class="mb-3 text-xl font-semibold">Posts</h2>
+    <ContentList items={posts} emptyText="No posts for this tag." />
+  </section>
+  <section>
+    <h2 class="mb-3 text-xl font-semibold">Resources</h2>
+    <ContentList items={resources} emptyText="No resources for this tag." />
+  </section>
+</ResearchLibraryLayout>

@@ -1,0 +1,20 @@
+---
+import { getCollection } from "astro:content";
+import ContentList from "@/components/ContentList.astro";
+import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { filterPublicEntries } from "@/utils/researchLibrary";
+
+const topics = filterPublicEntries(await getCollection("topics")).map(topic => ({
+  href: `/topics/${topic.id}/`,
+  title: topic.data.title,
+  description: topic.data.description,
+  meta: topic.data.tags.join(" / "),
+}));
+---
+
+<ResearchLibraryLayout
+  title="Topics"
+  description="Long-running research areas and learning paths."
+>
+  <ContentList items={topics} emptyText="No topics yet." />
+</ResearchLibraryLayout>

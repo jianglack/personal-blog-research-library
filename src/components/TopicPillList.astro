@@ -1,0 +1,24 @@
+---
+interface Props {
+  topics: string[];
+}
+
+const { topics } = Astro.props;
+---
+
+{
+  topics.length > 0 && (
+    <ul class="flex flex-wrap gap-2">
+      {topics.map(topic => (
+        <li>
+          <a
+            class="border-border rounded border px-2 py-1 text-xs hover:bg-muted/75"
+            href={`/topics/${topic}/`}
+          >
+            {topic}
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}

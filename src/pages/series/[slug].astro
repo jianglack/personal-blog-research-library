@@ -1,0 +1,24 @@
+---
+import { getCollection } from "astro:content";
+import ContentList from "@/components/ContentList.astro";
+import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { filterPublicEntries, getSeriesEntries } from "@/utils/researchLibrary";
+
+export async function getStaticPaths() {
+  const series = filterPublicEntries(await getCollection("series"));
+  return series.map(item => ({ params: { slug: item.id }, props: { item } }));
+}
+
+const { item } = Astro.props;
+const posts = filterPublicEntries(await getCollection("posts"));
+const orderedPosts = getSeriesEntries(item.data.posts, posts).map(post => ({
+  href: `/posts/${post.id}/`,
+  title: post.data.title,
+  description: post.data.description,
+  meta: post.data.tags.join(" / "),
+}));
+---
+
+<ResearchLibraryLayout title={item.data.title} description={item.data.description}>
+  <ContentList items={orderedPosts} emptyText="No posts in this series yet." />
+</ResearchLibraryLayout>

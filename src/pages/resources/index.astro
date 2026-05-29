@@ -1,0 +1,23 @@
+---
+import { getCollection } from "astro:content";
+import ContentList from "@/components/ContentList.astro";
+import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { filterPublicEntries } from "@/utils/researchLibrary";
+
+const formatResourceMeta = (type: string, tags: string[]) =>
+  [type, ...tags].join(" / ");
+
+const resources = filterPublicEntries(await getCollection("resources")).map(resource => ({
+  href: `/resources/${resource.id}/`,
+  title: resource.data.title,
+  description: resource.data.description,
+  meta: formatResourceMeta(resource.data.type, resource.data.tags),
+}));
+---
+
+<ResearchLibraryLayout
+  title="Resources"
+  description="Papers, books, tools, links, and reference notes."
+>
+  <ContentList items={resources} emptyText="No resources yet." />
+</ResearchLibraryLayout>

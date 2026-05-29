@@ -1,0 +1,20 @@
+---
+import { getCollection } from "astro:content";
+import ContentList from "@/components/ContentList.astro";
+import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { filterPublicEntries } from "@/utils/researchLibrary";
+
+const series = filterPublicEntries(await getCollection("series")).map(item => ({
+  href: `/series/${item.id}/`,
+  title: item.data.title,
+  description: item.data.description,
+  meta: `${item.data.posts.length} posts`,
+}));
+---
+
+<ResearchLibraryLayout
+  title="Series"
+  description="Ordered learning paths and long-form note sequences."
+>
+  <ContentList items={series} emptyText="No series yet." />
+</ResearchLibraryLayout>

@@ -1,0 +1,27 @@
+---
+import ResearchCard from "./ResearchCard.astro";
+
+interface Item {
+  href: string;
+  title: string;
+  description: string;
+  meta?: string;
+}
+
+interface Props {
+  items: Item[];
+  emptyText?: string;
+}
+
+const { items, emptyText = "No entries yet." } = Astro.props;
+---
+
+{
+  items.length > 0 ? (
+    <div class="divide-border divide-y">
+      {items.map(item => <ResearchCard {...item} />)}
+    </div>
+  ) : (
+    <p class="text-sm text-foreground/70">{emptyText}</p>
+  )
+}

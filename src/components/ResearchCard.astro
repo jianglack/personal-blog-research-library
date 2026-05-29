@@ -1,0 +1,21 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  meta?: string;
+}
+
+const { href, title, description, meta } = Astro.props;
+---
+
+<article class="border-border border-b py-4">
+  <a
+    class="inline-block text-lg font-semibold underline-offset-4 hover:underline"
+    href={href}
+  >
+    {title}
+  </a>
+  <p class="mt-1 text-sm text-foreground/80">{description}</p>
+  {meta && <p class="mt-2 text-xs text-foreground/70">{meta}</p>}
+</article>

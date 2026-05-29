@@ -1,0 +1,37 @@
+---
+import { getCollection, render } from "astro:content";
+import TopicPillList from "@/components/TopicPillList.astro";
+import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { filterPublicEntries } from "@/utils/researchLibrary";
+
+export async function getStaticPaths() {
+  const resources = filterPublicEntries(await getCollection("resources"));
+  return resources.map(resource => ({
+    params: { slug: resource.id },
+    props: { resource },
+  }));
+}
+
+const { resource } = Astro.props;
+const { Content } = await render(resource);
+---
+
+<ResearchLibraryLayout title={resource.data.title} description={resource.data.description}>
+  <div class="mb-6 space-y-3 text-sm">
+    <p>Type: {resource.data.type}</p>
+    {
+      resource.data.url && (
+        <p>
+          Source:{" "}
+          <a class="underline" href={resource.data.url}>
+            {resource.data.url}
+          </a>
+        </p>
+      )
+    }
+    <TopicPillList topics={resource.data.topics} />
+  </div>
+  <article class="app-prose max-w-none">
+    <Content />
+  </article>
+</ResearchLibraryLayout>

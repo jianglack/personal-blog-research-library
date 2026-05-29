@@ -1,0 +1,53 @@
+---
+import { getCollection } from "astro:content";
+import ContentList from "@/components/ContentList.astro";
+import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { filterPublicEntries, sortByDateDesc } from "@/utils/researchLibrary";
+
+export async function getStaticPaths() {
+  const topics = filterPublicEntries(await getCollection("topics"));
+  return topics.map(topic => ({ params: { slug: topic.id }, props: { topic } }));
+}
+
+const { topic } = Astro.props;
+const posts = sortByDateDesc(filterPublicEntries(await getCollection("posts")))
+  .filter(post => post.data.topics.includes(topic.id))
+  .map(post => ({
+    href: `/posts/${post.id}/`,
+    title: post.data.title,
+    description: post.data.description,
+    meta: post.data.tags.join(" / "),
+  }));
+
+const resources = filterPublicEntries(await getCollection("resources"))
+  .filter(resource => resource.data.topics.includes(topic.id))
+  .map(resource => ({
+    href: `/resources/${resource.id}/`,
+    title: resource.data.title,
+    description: resource.data.description,
+    meta: resource.data.type,
+  }));
+---
+
+<ResearchLibraryLayout title={topic.data.title} description={topic.data.description}>
+  {
+    topic.data.readingPath.length > 0 && (
+      <section class="mb-8">
+        <h2 class="mb-3 text-xl font-semibold">Reading Path</h2>
+        <ol class="list-decimal space-y-2 pl-5">
+          {topic.data.readingPath.map(item => <li>{item}</li>)}
+        </ol>
+      </section>
+    )
+  }
+
+  <section class="mb-8">
+    <h2 class="mb-3 text-xl font-semibold">Posts</h2>
+    <ContentList items={posts} emptyText="No posts for this topic yet." />
+  </section>
+
+  <section>
+    <h2 class="mb-3 text-xl font-semibold">Resources</h2>
+    <ContentList items={resources} emptyText="No resources for this topic yet." />
+  </section>
+</ResearchLibraryLayout>
