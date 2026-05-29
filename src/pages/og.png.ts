@@ -11,8 +11,9 @@ export const GET: APIRoute = async context => {
     const image = await readFile(new URL("../../public/default-og.jpg", import.meta.url)).catch(() =>
       readFile(new URL("../../default-og.jpg", import.meta.url))
     );
-    return new Response(image, {
-      headers: { "Content-Type": "image/jpeg" },
+    const png = Uint8Array.from(await sharp(image).png().toBuffer());
+    return new Response(png, {
+      headers: { "Content-Type": "image/png" },
     });
   }
   const fonts = fontData["--font-google-sans-code"];
