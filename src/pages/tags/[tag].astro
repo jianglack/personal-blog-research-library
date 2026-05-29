@@ -37,26 +37,31 @@ const posts = sortByDateDesc((await getCollection("posts")).filter(postFilter))
     href: getPostUrl(post.id, post.filePath, locale),
     title: post.data.title,
     description: post.data.description,
-    meta: "Post",
+    meta: "文章",
   }));
 
 const resources = filterPublicEntries(await getCollection("resources"))
-  .filter(resource => resource.data.tags.some(resourceTag => slugifyStr(resourceTag) === tag))
+  .filter(resource =>
+    resource.data.tags.some(resourceTag => slugifyStr(resourceTag) === tag)
+  )
   .map(resource => ({
     href: `/resources/${resource.id}/`,
     title: resource.data.title,
     description: resource.data.description,
-    meta: `Resource / ${resource.data.type}`,
+    meta: `资源 / ${resource.data.type}`,
   }));
 ---
 
-<ResearchLibraryLayout title={`Tag: ${tagName}`} description="Posts and resources with this tag.">
+<ResearchLibraryLayout
+  title={`标签：${tagName}`}
+  description="包含该标签的文章和资源。"
+>
   <section class="mb-8">
-    <h2 class="mb-3 text-xl font-semibold">Posts</h2>
-    <ContentList items={posts} emptyText="No posts for this tag." />
+    <h2 class="mb-3 text-xl font-semibold">文章</h2>
+    <ContentList items={posts} emptyText="这个标签下还没有文章。" />
   </section>
   <section>
-    <h2 class="mb-3 text-xl font-semibold">Resources</h2>
-    <ContentList items={resources} emptyText="No resources for this tag." />
+    <h2 class="mb-3 text-xl font-semibold">资源</h2>
+    <ContentList items={resources} emptyText="这个标签下还没有资源。" />
   </section>
 </ResearchLibraryLayout>

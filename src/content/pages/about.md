@@ -1,37 +1,23 @@
 ---
-title: "About"
-description: "A bit about me and this blog."
+title: "关于"
+description: "这个博客的定位、内容结构和发布方式。"
 ---
 
-AstroPaper is a minimal, accessible and SEO-friendly blog theme built with [Astro](https://astro.build/) and [Tailwind CSS](https://tailwindcss.com/).
+这里是一个个人技术博客和研究资料库。重点不是个人展示，而是长期整理可以反复阅读、引用和更新的技术笔记。
 
-![Astro Paper](@/assets/images/astropaper-og.jpg)
+内容会按四类组织：
 
-AstroPaper provides a solid foundation for blogs, or even portfolios\_ with full markdown support, built-in dark mode, and a clean layout that works out-of-the-box.
+- 文章：完整的长文、学习笔记和技术分析。
+- 主题：长期研究方向，例如语言模型推理、系统工程和工具链。
+- 系列：有顺序的学习路径或专题笔记。
+- 资源：论文、书籍、工具、链接和参考材料。
 
-The blog posts in this theme also serve as guides, docs or example articles\_ making AstroPaper a flexible starting point for your next content-driven site.
+网站保持完全静态，不包含评论、登录、后台 API 或访问分析。内容通过 Markdown/MDX 写作，适合配合一个公开的 Obsidian vault 维护。
 
-## Features
+## 写作语言
 
-AstroPaper comes with a set of useful features that make content publishing easy and effective:
+文章可以是中文或英文，但每篇文章默认只使用一种语言。列表、搜索、标签和 RSS 会混合展示所有公开内容。
 
-- SEO-friendly
-- Fast performance
-- Light & dark mode
-- Highly customizable
-- Organizable blog posts
-- Responsive & accessible
-- Static search with [PageFind](https://pagefind.app/)
-- Automatic social image generation
+## 发布方式
 
-and so much more.
-
-## Show your support
-
-If you like [AstroPaper](https://github.com/satnaing/astro-paper), consider giving it a star ⭐️.
-
-Found a bug 🐛 or have an improvement ✨ in mind? Feel free to open an [issue](https://github.com/satnaing/astro-paper/issues), submit a [pull request](https://github.com/satnaing/astro-paper/pulls) or start a [discussion](https://github.com/satnaing/astro-paper/discussions).
-
-If you find this theme helpful, you can also [sponsor me on GitHub](https://github.com/sponsors/satnaing) or [buy me a coffee](https://buymeacoffee.com/satnaing) to show your support — every penny counts.
-
-Kyay zuu! 🙏🏼
+部署目标是 Cloudflare Pages。构建时生成 HTML、RSS、sitemap 和 Pagefind 搜索索引，访问时不需要自己的服务器。

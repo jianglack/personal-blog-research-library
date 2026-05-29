@@ -25,6 +25,9 @@ const orderedPosts = getSeriesEntries(item.data.posts, posts)
   }));
 ---
 
-<ResearchLibraryLayout title={item.data.title} description={item.data.description}>
-  <ContentList items={orderedPosts} emptyText="No posts in this series yet." />
+<ResearchLibraryLayout
+  title={item.data.title}
+  description={item.data.description}
+>
+  <ContentList items={orderedPosts} emptyText="这个系列下还没有文章。" />
 </ResearchLibraryLayout>

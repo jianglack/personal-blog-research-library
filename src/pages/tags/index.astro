@@ -19,18 +19,19 @@ for (const tag of [
   }
 }
 
-const tags = Array.from(tagsBySlug, ([slug, tagName]) => ({ slug, tagName })).sort((a, b) =>
-  a.slug.localeCompare(b.slug)
-);
+const tags = Array.from(tagsBySlug, ([slug, tagName]) => ({
+  slug,
+  tagName,
+})).sort((a, b) => a.slug.localeCompare(b.slug));
 ---
 
-<ResearchLibraryLayout title="Tags" description="Browse posts and resources by tag.">
+<ResearchLibraryLayout title="标签" description="按标签浏览文章和资源。">
   <ul class="flex flex-wrap gap-2">
     {
       tags.map(({ slug, tagName }) => (
         <li>
           <a
-            class="border-border rounded border px-2 py-1 text-sm hover:bg-muted/75"
+            class="border-border hover:bg-muted/75 rounded border px-2 py-1 text-sm"
             href={`/tags/${slug}/`}
           >
             {tagName}

@@ -10,7 +10,10 @@ const locale = Astro.currentLocale;
 
 export async function getStaticPaths() {
   const topics = filterPublicEntries(await getCollection("topics"));
-  return topics.map(topic => ({ params: { slug: topic.id }, props: { topic } }));
+  return topics.map(topic => ({
+    params: { slug: topic.id },
+    props: { topic },
+  }));
 }
 
 const { topic } = Astro.props;
@@ -33,25 +36,30 @@ const resources = filterPublicEntries(await getCollection("resources"))
   }));
 ---
 
-<ResearchLibraryLayout title={topic.data.title} description={topic.data.description}>
+<ResearchLibraryLayout
+  title={topic.data.title}
+  description={topic.data.description}
+>
   {
     topic.data.readingPath.length > 0 && (
       <section class="mb-8">
-        <h2 class="mb-3 text-xl font-semibold">Reading Path</h2>
+        <h2 class="mb-3 text-xl font-semibold">阅读路径</h2>
         <ol class="list-decimal space-y-2 pl-5">
-          {topic.data.readingPath.map(item => <li>{item}</li>)}
+          {topic.data.readingPath.map(item => (
+            <li>{item}</li>
+          ))}
         </ol>
       </section>
     )
   }
 
   <section class="mb-8">
-    <h2 class="mb-3 text-xl font-semibold">Posts</h2>
-    <ContentList items={posts} emptyText="No posts for this topic yet." />
+    <h2 class="mb-3 text-xl font-semibold">文章</h2>
+    <ContentList items={posts} emptyText="这个主题下还没有文章。" />
   </section>
 
   <section>
-    <h2 class="mb-3 text-xl font-semibold">Resources</h2>
-    <ContentList items={resources} emptyText="No resources for this topic yet." />
+    <h2 class="mb-3 text-xl font-semibold">资源</h2>
+    <ContentList items={resources} emptyText="这个主题下还没有资源。" />
   </section>
 </ResearchLibraryLayout>

@@ -7,17 +7,19 @@ import { filterPublicEntries } from "@/utils/researchLibrary";
 const formatResourceMeta = (type: string, tags: string[]) =>
   [type, ...tags].join(" / ");
 
-const resources = filterPublicEntries(await getCollection("resources")).map(resource => ({
-  href: `/resources/${resource.id}/`,
-  title: resource.data.title,
-  description: resource.data.description,
-  meta: formatResourceMeta(resource.data.type, resource.data.tags),
-}));
+const resources = filterPublicEntries(await getCollection("resources")).map(
+  resource => ({
+    href: `/resources/${resource.id}/`,
+    title: resource.data.title,
+    description: resource.data.description,
+    meta: formatResourceMeta(resource.data.type, resource.data.tags),
+  })
+);
 ---
 
 <ResearchLibraryLayout
-  title="Resources"
-  description="Papers, books, tools, links, and reference notes."
+  title="资源"
+  description="论文、书籍、工具、链接和参考笔记。"
 >
-  <ContentList items={resources} emptyText="No resources yet." />
+  <ContentList items={resources} emptyText="还没有资源。" />
 </ResearchLibraryLayout>

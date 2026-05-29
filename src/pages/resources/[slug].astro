@@ -16,13 +16,16 @@ const { resource } = Astro.props;
 const { Content } = await render(resource);
 ---
 
-<ResearchLibraryLayout title={resource.data.title} description={resource.data.description}>
+<ResearchLibraryLayout
+  title={resource.data.title}
+  description={resource.data.description}
+>
   <div class="mb-6 space-y-3 text-sm">
-    <p>Type: {resource.data.type}</p>
+    <p>类型：{resource.data.type}</p>
     {
       resource.data.url && (
         <p>
-          Source:{" "}
+          来源：{" "}
           <a class="underline" href={resource.data.url}>
             {resource.data.url}
           </a>

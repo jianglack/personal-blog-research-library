@@ -15,16 +15,19 @@ if (!config.features.showArchives && notFoundUrl) {
 }
 
 const posts = sortByDateDesc((await getCollection("posts")).filter(postFilter));
-const postsByYear = posts.reduce<Record<string, typeof posts>>((groups, post) => {
-  const year = String(post.data.date.getFullYear());
-  groups[year] = groups[year] ?? [];
-  groups[year].push(post);
-  return groups;
-}, {});
+const postsByYear = posts.reduce<Record<string, typeof posts>>(
+  (groups, post) => {
+    const year = String(post.data.date.getFullYear());
+    groups[year] = groups[year] ?? [];
+    groups[year].push(post);
+    return groups;
+  },
+  {}
+);
 const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
 ---
 
-<ResearchLibraryLayout title="Archives" description="Posts grouped by publication year.">
+<ResearchLibraryLayout title="归档" description="按发布时间年份整理的文章。">
   <div class="space-y-8">
     {
       years.map(year => (

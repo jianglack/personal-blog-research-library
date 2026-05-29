@@ -8,13 +8,13 @@ const series = filterPublicEntries(await getCollection("series")).map(item => ({
   href: `/series/${item.id}/`,
   title: item.data.title,
   description: item.data.description,
-  meta: `${item.data.posts.length} posts`,
+  meta: `${item.data.posts.length} 篇文章`,
 }));
 ---
 
 <ResearchLibraryLayout
-  title="Series"
-  description="Ordered learning paths and long-form note sequences."
+  title="系列"
+  description="有明确顺序的学习路径和长文笔记序列。"
 >
-  <ContentList items={series} emptyText="No series yet." />
+  <ContentList items={series} emptyText="还没有系列。" />
 </ResearchLibraryLayout>

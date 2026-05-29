@@ -4,17 +4,19 @@ import ContentList from "@/components/ContentList.astro";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
 import { filterPublicEntries } from "@/utils/researchLibrary";
 
-const topics = filterPublicEntries(await getCollection("topics")).map(topic => ({
-  href: `/topics/${topic.id}/`,
-  title: topic.data.title,
-  description: topic.data.description,
-  meta: topic.data.tags.join(" / "),
-}));
+const topics = filterPublicEntries(await getCollection("topics")).map(
+  topic => ({
+    href: `/topics/${topic.id}/`,
+    title: topic.data.title,
+    description: topic.data.description,
+    meta: topic.data.tags.join(" / "),
+  })
+);
 ---
 
 <ResearchLibraryLayout
-  title="Topics"
-  description="Long-running research areas and learning paths."
+  title="主题"
+  description="长期关注的研究方向和学习路径。"
 >
-  <ContentList items={topics} emptyText="No topics yet." />
+  <ContentList items={topics} emptyText="还没有主题。" />
 </ResearchLibraryLayout>

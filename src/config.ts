@@ -38,4 +38,28 @@ const config: ResolvedAstroPaperConfig = {
   shareLinks: userConfig.shareLinks ?? [],
 };
 
+export const SITE = {
+  website: config.site.url,
+  author: config.site.author,
+  profile: config.site.profile ?? config.site.url,
+  desc: config.site.description,
+  title: config.site.title,
+  ogImage: config.site.ogImage,
+  lightAndDarkMode: config.features.lightAndDarkMode,
+  postPerIndex: config.posts.perIndex,
+  postPerPage: config.posts.perPage,
+  scheduledPostMargin: config.posts.scheduledPostMargin,
+  showArchives: config.features.showArchives,
+  showBackButton: config.features.showBackButton,
+  editPost: {
+    enabled: config.features.editPost.enabled,
+    text: "编辑页面",
+    url: config.features.editPost.enabled ? config.features.editPost.url : "",
+  },
+  dynamicOgImage: config.features.dynamicOgImage,
+  dir: config.site.dir,
+  lang: config.site.lang,
+  timezone: config.site.timezone,
+} as const;
+
 export default config;
