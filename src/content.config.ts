@@ -1,27 +1,51 @@
+import { glob } from "astro/loaders";
 import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
-import { glob } from "astro/loaders";
 import config from "@/config";
 
 export const BLOG_PATH = "src/content/posts";
 
+const langSchema = z.enum(["zh", "en"]);
+
 const posts = defineCollection({
   loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: `./${BLOG_PATH}` }),
   schema: ({ image }) =>
-    z.object({
-      author: z.string().default(config.site.author),
-      pubDatetime: z.date(),
-      modDatetime: z.date().optional().nullable(),
-      title: z.string(),
-      featured: z.boolean().optional(),
-      draft: z.boolean().optional(),
-      tags: z.array(z.string()).default(["others"]),
-      ogImage: image().or(z.string()).optional(),
-      description: z.string(),
-      canonicalURL: z.string().optional(),
-      hideEditPost: z.boolean().optional(),
-      timezone: z.string().optional(),
-    }),
+    z
+      .object({
+        author: z.string().default(config.site.author),
+        title: z.string(),
+        date: z.coerce.date().optional(),
+        updated: z.coerce.date().optional(),
+        lang: langSchema.default("en"),
+        description: z.string(),
+        tags: z.array(z.string()).default([]),
+        topics: z.array(z.string()).default([]),
+        series: z.array(z.string()).default([]),
+        draft: z.boolean().default(false),
+        featured: z.boolean().default(false),
+        cover: z.string().optional(),
+        pubDatetime: z.coerce.date().optional(),
+        modDatetime: z.coerce.date().optional().nullable(),
+        ogImage: image().or(z.string()).optional(),
+        canonicalURL: z.string().optional(),
+        hideEditPost: z.boolean().optional(),
+        timezone: z.string().optional(),
+      })
+      .refine(data => data.date || data.pubDatetime, {
+        message: "Post requires either date or pubDatetime",
+      })
+      .transform(data => {
+        const date = data.date ?? data.pubDatetime ?? new Date(0);
+        const updated = data.updated ?? data.modDatetime ?? undefined;
+
+        return {
+          ...data,
+          date,
+          updated,
+          pubDatetime: data.pubDatetime ?? date,
+          modDatetime: data.modDatetime ?? updated ?? null,
+        };
+      }),
 });
 
 const pages = defineCollection({
@@ -29,9 +53,57 @@ const pages = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
+    draft: z.boolean().default(false),
     ogImage: z.string().optional(),
     canonicalURL: z.string().optional(),
   }),
 });
 
-export const collections = { posts, pages };
+const topics = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/topics" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    lang: langSchema.default("en"),
+    featured: z.boolean().default(false),
+    tags: z.array(z.string()).default([]),
+    readingPath: z.array(z.string()).default([]),
+    keyQuestions: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+});
+
+const series = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/series" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    lang: langSchema.default("en"),
+    posts: z.array(z.string()).default([]),
+    topics: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+});
+
+const resources = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/resources" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    lang: langSchema.default("en"),
+    type: z.enum(["paper", "book", "tool", "link", "note"]),
+    url: z.url().optional(),
+    topics: z.array(z.string()).default([]),
+    tags: z.array(z.string()).default([]),
+    date: z.coerce.date().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = {
+  posts,
+  pages,
+  topics,
+  series,
+  resources,
+};
