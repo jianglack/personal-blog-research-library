@@ -16,6 +16,7 @@ import {
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
+import { remarkObsidianLinks } from "./src/utils/obsidianLinks";
 import { transformerFileName } from "./src/utils/transformers/fileName";
 import config from "./astro-paper.config";
 
@@ -38,6 +39,7 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [
       remarkMath,
+      remarkObsidianLinks,
       remarkToc,
       [remarkCollapse, { test: "Table of contents" }],
     ],

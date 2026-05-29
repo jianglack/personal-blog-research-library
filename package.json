@@ -25,7 +25,7 @@
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.3.3",
     "dayjs": "^1.11.20",
-    "katex": "^0.17.0",
+    "katex": "^0.16.47",
     "lodash.kebabcase": "^4.1.1",
     "rehype-katex": "^7.0.1",
     "remark-collapse": "^0.1.2",
