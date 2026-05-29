@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
 import config from "@/config";
+import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import { sortByDateDesc } from "@/utils/researchLibrary";
 
@@ -32,7 +33,10 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
           <ul class="space-y-2">
             {postsByYear[year].map(post => (
               <li>
-                <a class="underline-offset-4 hover:underline" href={`/posts/${post.id}/`}>
+                <a
+                  class="underline-offset-4 hover:underline"
+                  href={getPostUrl(post.id, post.filePath, locale)}
+                >
                   {post.data.title}
                 </a>
               </li>

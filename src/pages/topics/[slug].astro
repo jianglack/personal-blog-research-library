@@ -2,8 +2,11 @@
 import { getCollection } from "astro:content";
 import ContentList from "@/components/ContentList.astro";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import { filterPublicEntries, sortByDateDesc } from "@/utils/researchLibrary";
+
+const locale = Astro.currentLocale;
 
 export async function getStaticPaths() {
   const topics = filterPublicEntries(await getCollection("topics"));
@@ -14,7 +17,7 @@ const { topic } = Astro.props;
 const posts = sortByDateDesc((await getCollection("posts")).filter(postFilter))
   .filter(post => post.data.topics.includes(topic.id))
   .map(post => ({
-    href: `/posts/${post.id}/`,
+    href: getPostUrl(post.id, post.filePath, locale),
     title: post.data.title,
     description: post.data.description,
     meta: post.data.tags.join(" / "),

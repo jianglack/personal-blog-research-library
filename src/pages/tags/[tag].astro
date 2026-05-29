@@ -2,9 +2,12 @@
 import { getCollection } from "astro:content";
 import ContentList from "@/components/ContentList.astro";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import { filterPublicEntries, sortByDateDesc } from "@/utils/researchLibrary";
 import { slugifyStr } from "@/utils/slugify";
+
+const locale = Astro.currentLocale;
 
 export async function getStaticPaths() {
   const posts = (await getCollection("posts")).filter(postFilter);
@@ -31,7 +34,7 @@ const { tag, tagName } = Astro.props;
 const posts = sortByDateDesc((await getCollection("posts")).filter(postFilter))
   .filter(post => post.data.tags.some(postTag => slugifyStr(postTag) === tag))
   .map(post => ({
-    href: `/posts/${post.id}/`,
+    href: getPostUrl(post.id, post.filePath, locale),
     title: post.data.title,
     description: post.data.description,
     meta: "Post",
