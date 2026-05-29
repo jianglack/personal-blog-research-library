@@ -2,27 +2,34 @@
 import { getCollection } from "astro:content";
 import ContentList from "@/components/ContentList.astro";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { postFilter } from "@/utils/postFilter";
 import { filterPublicEntries, sortByDateDesc } from "@/utils/researchLibrary";
+import { slugifyStr } from "@/utils/slugify";
 
 export async function getStaticPaths() {
-  const posts = filterPublicEntries(await getCollection("posts"));
+  const posts = (await getCollection("posts")).filter(postFilter);
   const resources = filterPublicEntries(await getCollection("resources"));
-  const tags = Array.from(
-    new Set([
-      ...posts.flatMap(post => post.data.tags),
-      ...resources.flatMap(resource => resource.data.tags),
-    ])
-  );
+  const tagsBySlug = new Map<string, string>();
 
-  return tags.map(tag => ({
-    params: { tag: encodeURIComponent(tag) },
-    props: { tag },
+  for (const tag of [
+    ...posts.flatMap(post => post.data.tags),
+    ...resources.flatMap(resource => resource.data.tags),
+  ]) {
+    const slug = slugifyStr(tag);
+    if (!tagsBySlug.has(slug)) {
+      tagsBySlug.set(slug, tag);
+    }
+  }
+
+  return Array.from(tagsBySlug, ([slug, tagName]) => ({
+    params: { tag: slug },
+    props: { tag: slug, tagName },
   }));
 }
 
-const { tag } = Astro.props;
-const posts = sortByDateDesc(filterPublicEntries(await getCollection("posts")))
-  .filter(post => post.data.tags.includes(tag))
+const { tag, tagName } = Astro.props;
+const posts = sortByDateDesc((await getCollection("posts")).filter(postFilter))
+  .filter(post => post.data.tags.some(postTag => slugifyStr(postTag) === tag))
   .map(post => ({
     href: `/posts/${post.id}/`,
     title: post.data.title,
@@ -31,7 +38,7 @@ const posts = sortByDateDesc(filterPublicEntries(await getCollection("posts")))
   }));
 
 const resources = filterPublicEntries(await getCollection("resources"))
-  .filter(resource => resource.data.tags.includes(tag))
+  .filter(resource => resource.data.tags.some(resourceTag => slugifyStr(resourceTag) === tag))
   .map(resource => ({
     href: `/resources/${resource.id}/`,
     title: resource.data.title,
@@ -40,7 +47,7 @@ const resources = filterPublicEntries(await getCollection("resources"))
   }));
 ---
 
-<ResearchLibraryLayout title={`Tag: ${tag}`} description="Posts and resources with this tag.">
+<ResearchLibraryLayout title={`Tag: ${tagName}`} description="Posts and resources with this tag.">
   <section class="mb-8">
     <h2 class="mb-3 text-xl font-semibold">Posts</h2>
     <ContentList items={posts} emptyText="No posts for this tag." />

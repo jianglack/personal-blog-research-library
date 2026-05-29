@@ -1,28 +1,39 @@
 ---
 import { getCollection } from "astro:content";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import { postFilter } from "@/utils/postFilter";
 import { filterPublicEntries } from "@/utils/researchLibrary";
+import { slugifyStr } from "@/utils/slugify";
 
-const posts = filterPublicEntries(await getCollection("posts"));
+const posts = (await getCollection("posts")).filter(postFilter);
 const resources = filterPublicEntries(await getCollection("resources"));
-const tags = Array.from(
-  new Set([
-    ...posts.flatMap(post => post.data.tags),
-    ...resources.flatMap(resource => resource.data.tags),
-  ])
-).sort((a, b) => a.localeCompare(b));
+const tagsBySlug = new Map<string, string>();
+
+for (const tag of [
+  ...posts.flatMap(post => post.data.tags),
+  ...resources.flatMap(resource => resource.data.tags),
+]) {
+  const slug = slugifyStr(tag);
+  if (!tagsBySlug.has(slug)) {
+    tagsBySlug.set(slug, tag);
+  }
+}
+
+const tags = Array.from(tagsBySlug, ([slug, tagName]) => ({ slug, tagName })).sort((a, b) =>
+  a.slug.localeCompare(b.slug)
+);
 ---
 
 <ResearchLibraryLayout title="Tags" description="Browse posts and resources by tag.">
   <ul class="flex flex-wrap gap-2">
     {
-      tags.map(tag => (
+      tags.map(({ slug, tagName }) => (
         <li>
           <a
             class="border-border rounded border px-2 py-1 text-sm hover:bg-muted/75"
-            href={`/tags/${encodeURIComponent(tag)}/`}
+            href={`/tags/${slug}/`}
           >
-            {tag}
+            {tagName}
           </a>
         </li>
       ))
