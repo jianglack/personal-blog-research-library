@@ -1,15 +1,18 @@
 ---
 import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
 import ContentList from "@/components/ContentList.astro";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import config from "@/config";
 import { filterPublicEntries } from "@/utils/researchLibrary";
 
+const locale = Astro.currentLocale ?? config.site.lang;
 const formatResourceMeta = (type: string, tags: string[]) =>
   [type, ...tags].join(" / ");
 
 const resources = filterPublicEntries(await getCollection("resources")).map(
   resource => ({
-    href: `/resources/${resource.id}/`,
+    href: getRelativeLocaleUrl(locale, `resources/${resource.id}`),
     title: resource.data.title,
     description: resource.data.description,
     meta: formatResourceMeta(resource.data.type, resource.data.tags),

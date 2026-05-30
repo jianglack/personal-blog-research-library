@@ -2,11 +2,12 @@
 import { getCollection } from "astro:content";
 import ContentList from "@/components/ContentList.astro";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import config from "@/config";
 import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import { filterPublicEntries, getSeriesEntries } from "@/utils/researchLibrary";
 
-const locale = Astro.currentLocale;
+const locale = Astro.currentLocale ?? config.site.lang;
 
 export async function getStaticPaths() {
   const series = filterPublicEntries(await getCollection("series"));
@@ -28,6 +29,7 @@ const orderedPosts = getSeriesEntries(item.data.posts, posts)
 <ResearchLibraryLayout
   title={item.data.title}
   description={item.data.description}
+  lang={item.data.lang}
 >
   <ContentList items={orderedPosts} emptyText="这个系列下还没有文章。" />
 </ResearchLibraryLayout>

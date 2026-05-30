@@ -11,6 +11,7 @@ import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import { filterPublicEntries, sortByDateDesc } from "@/utils/researchLibrary";
 import { getSortedPosts } from "@/utils/getSortedPosts";
+import { getAssetPath } from "@/utils/withBase";
 import config from "@/config";
 
 const { posts: postsConfig } = config;
@@ -74,7 +75,7 @@ const homePath = getRelativeLocaleUrl(locale, "");
         </div>
         <a
           target="_blank"
-          href={getRelativeLocaleUrl(locale, "rss.xml")}
+          href={getAssetPath("rss.xml")}
           class="mt-5 inline-block"
           aria-label="RSS 订阅"
           title="RSS 订阅"

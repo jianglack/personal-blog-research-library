@@ -2,12 +2,12 @@ import { defineAstroPaperConfig } from "./src/types/config";
 
 export default defineAstroPaperConfig({
   site: {
-    url: "https://example.pages.dev/",
+    url: "https://personal-blog-research-library.pages.dev/",
     title: "研究笔记",
     description: "按文章、主题、系列和资源组织的长期技术笔记。",
     author: "研究笔记",
-    profile: "https://example.pages.dev/",
-    ogImage: "default-og.jpg",
+    profile: "https://personal-blog-research-library.pages.dev/",
+    ogImage: "og.png",
     lang: "zh",
     timezone: "Asia/Shanghai",
     dir: "ltr",
@@ -29,6 +29,6 @@ export default defineAstroPaperConfig({
   },
   socials: [],
   shareLinks: [
-    { name: "mail", url: "mailto:?subject=See%20this%20post&body=" },
+    { name: "mail", url: "mailto:?subject=%E5%88%86%E4%BA%AB%E8%BF%99%E7%AF%87%E6%96%87%E7%AB%A0&body=" },
   ],
 });

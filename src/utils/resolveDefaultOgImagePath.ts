@@ -32,6 +32,10 @@ export function resolveDefaultOgImagePath(
     );
   }
 
+  if (filename === "og.png") {
+    return getAssetPath("og.png");
+  }
+
   if (config.features.dynamicOgImage) {
     return existsInPublic(filename)
       ? getAssetPath(filename)

@@ -9,15 +9,20 @@ import config from "@/config";
 interface Props {
   title: string;
   description?: string;
+  lang?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, lang } = Astro.props;
 ---
 
-<Layout title={`${title} | ${config.site.title}`} description={description}>
+<Layout
+  title={`${title} | ${config.site.title}`}
+  description={description}
+  {lang}
+>
   <Header />
   <Breadcrumb />
-  <Main pageTitle={title} pageDesc={description} class="pb-8">
+  <Main pageTitle={title} pageDesc={description} class="pb-8" searchable>
     <slot />
   </Main>
   <Footer />

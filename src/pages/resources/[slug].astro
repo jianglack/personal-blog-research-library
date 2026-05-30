@@ -19,6 +19,7 @@ const { Content } = await render(resource);
 <ResearchLibraryLayout
   title={resource.data.title}
   description={resource.data.description}
+  lang={resource.data.lang}
 >
   <div class="mb-6 space-y-3 text-sm">
     <p>类型：{resource.data.type}</p>

@@ -1,17 +1,23 @@
 import type { APIRoute } from "astro";
 import satori from "satori";
 import sharp from "sharp";
-import { readFile } from "node:fs/promises";
 import { fontData, experimental_getFontFileURL } from "astro:assets";
 import { getFontPathByWeight } from "@/utils/getFontPathByWeight";
 import config from "@/config";
 
 export const GET: APIRoute = async context => {
   if (!config.features.dynamicOgImage) {
-    const image = await readFile(new URL("../../public/default-og.jpg", import.meta.url)).catch(() =>
-      readFile(new URL("../../default-og.jpg", import.meta.url))
-    );
-    const png = Uint8Array.from(await sharp(image).png().toBuffer());
+    const hostname = new URL(config.site.url).hostname;
+    const svg = `
+      <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1200" height="630" fill="#fefbfb"/>
+        <rect x="70" y="70" width="1060" height="490" rx="14" fill="#fefbfb" stroke="#111111" stroke-width="5"/>
+        <rect x="92" y="92" width="1060" height="490" rx="14" fill="none" stroke="#111111" stroke-width="3" opacity="0.16"/>
+        <text x="600" y="285" text-anchor="middle" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="88" font-weight="700" fill="#111111">${config.site.title}</text>
+        <text x="600" y="365" text-anchor="middle" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="34" fill="#333333">${config.site.description}</text>
+        <text x="1060" y="505" text-anchor="end" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="30" font-weight="700" fill="#111111">${hostname}</text>
+      </svg>`;
+    const png = Uint8Array.from(await sharp(Buffer.from(svg)).png().toBuffer());
     return new Response(png, {
       headers: { "Content-Type": "image/png" },
     });
