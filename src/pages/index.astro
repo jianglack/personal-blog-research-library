@@ -65,28 +65,44 @@ const homePath = getRelativeLocaleUrl(locale, "");
     class="app-layout"
   >
     <section id="intro" class="border-border border-b pt-8 pb-8">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h1 class="my-4 text-4xl font-bold sm:my-8 sm:text-5xl">研究笔记</h1>
-          <p class="max-w-2xl">
-            按文章、主题、系列和资源组织的长期技术笔记。网站保持静态、可搜索、
-            支持 RSS，并优先服务深度阅读和知识整理。
+      <div
+        class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between"
+      >
+        <div class="max-w-2xl">
+          <h1 class="my-4 text-4xl font-bold sm:my-8 sm:text-5xl">
+            LouisJiang
+          </h1>
+          <p>
+            软工转大模型，记录技术学习、博客写作和自我感想随笔。这里按文章、
+            主题、系列和资源组织长期笔记，保持静态、可搜索、支持 RSS，
+            优先服务深度阅读和知识整理。
           </p>
         </div>
-        <a
-          target="_blank"
-          href={getAssetPath("rss.xml")}
-          class="mt-5 inline-block"
-          aria-label="RSS 订阅"
-          title="RSS 订阅"
-        >
-          <IconRss
-            width={20}
-            height={20}
-            class="stroke-accent scale-125 stroke-3 rtl:-rotate-90"
+        <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+          <img
+            src={getAssetPath("avatar.jpg")}
+            alt="louis 的头像"
+            width="112"
+            height="112"
+            class="border-border size-24 shrink-0 rounded-full border object-cover sm:size-28"
+            decoding="async"
+            loading="eager"
           />
-          <span class="sr-only">RSS 订阅</span>
-        </a>
+          <a
+            target="_blank"
+            href={getAssetPath("rss.xml")}
+            class="inline-block"
+            aria-label="RSS 订阅"
+            title="RSS 订阅"
+          >
+            <IconRss
+              width={20}
+              height={20}
+              class="stroke-accent scale-125 stroke-3 rtl:-rotate-90"
+            />
+            <span class="sr-only">RSS 订阅</span>
+          </a>
+        </div>
       </div>
     </section>
 

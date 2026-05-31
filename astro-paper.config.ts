@@ -3,10 +3,10 @@ import { defineAstroPaperConfig } from "./src/types/config";
 export default defineAstroPaperConfig({
   site: {
     url: "https://personal-blog-research-library.pages.dev/",
-    title: "研究笔记",
-    description: "按文章、主题、系列和资源组织的长期技术笔记。",
-    author: "研究笔记",
-    profile: "https://personal-blog-research-library.pages.dev/",
+    title: "LouisJiang",
+    description: "软工转大模型，记录技术学习、博客写作和自我感想随笔。",
+    author: "louis",
+    profile: "https://github.com/jianglack",
     ogImage: "og.png",
     lang: "zh",
     timezone: "Asia/Shanghai",
@@ -27,7 +27,18 @@ export default defineAstroPaperConfig({
     },
     search: "pagefind",
   },
-  socials: [],
+  socials: [
+    {
+      name: "github",
+      url: "https://github.com/jianglack",
+      linkTitle: "GitHub: jianglack",
+    },
+    {
+      name: "mail",
+      url: "mailto:zslouis8605@gmail.com",
+      linkTitle: "Email: zslouis8605@gmail.com",
+    },
+  ],
   shareLinks: [
     { name: "mail", url: "mailto:?subject=%E5%88%86%E4%BA%AB%E8%BF%99%E7%AF%87%E6%96%87%E7%AB%A0&body=" },
   ],

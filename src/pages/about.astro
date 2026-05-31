@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import config from "@/config";
+import { getAssetPath } from "@/utils/withBase";
 
 const about = await getEntry("pages", "about");
 
@@ -29,6 +30,14 @@ const { Content } = await render(about);
   <Breadcrumb />
 
   <Main pageTitle={about.data.title} class="app-prose">
+    <img
+      src={getAssetPath("avatar.jpg")}
+      alt="louis 的头像"
+      width="128"
+      height="128"
+      class="border-border mb-8 size-32 rounded-full border object-cover"
+      decoding="async"
+    />
     <Content />
   </Main>
 
