@@ -131,14 +131,14 @@ Expected result:
 
 ## Production URL
 
-Before the first public deployment, replace the placeholder site URL in
+The production Cloudflare Pages URL is already configured in
 `astro-paper.config.ts`:
 
 ```ts
 site: {
-  url: "https://your-domain.pages.dev/",
+  url: "https://personal-blog-research-library.pages.dev/",
 }
 ```
 
-Use the final Cloudflare Pages URL or your custom domain. This value controls
-canonical URLs, RSS links, Open Graph metadata, and sitemap output.
+If a custom domain is added later, update this value to that final public URL.
+It controls canonical URLs, RSS links, Open Graph metadata, and sitemap output.

@@ -1,16 +1,16 @@
 ---
-name: "\U0001F4DD Documentation Improvement"
-about: Propose updates or improvements to the documentation/blog posts
+name: "Documentation Improvement"
+about: Propose updates or improvements to the project docs or published notes
 title: "[Docs]: "
 labels: documentation
 assignees: ""
 ---
 
-**Describe the Issue**
-A clear and concise description of the documentation issue or improvement.
+**Describe the issue**
+A clear description of the documentation problem or improvement.
 
-**Proposed Changes**
-Describe what changes should be made and why they would improve the documentation.
+**Proposed change**
+Describe what should change and why.
 
-**Additional Context**
+**Additional context**
 Add any other context or screenshots about the documentation request here.

@@ -1,19 +1,19 @@
 ---
-name: "✨ Feature Request"
-about: Suggest an idea for improving AstroPaper
-title: "[Feature Request]: "
+name: "Feature Request"
+about: Suggest an improvement for the blog or publishing workflow
+title: "[Feature]: "
 labels: enhancement
 assignees: ""
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Problem**
+A clear and concise description of what problem this would solve.
 
-**Describe the solution you'd like**
+**Desired solution**
 A clear and concise description of what you want to happen.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Alternatives considered**
+A clear and concise description of alternatives you considered.
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
