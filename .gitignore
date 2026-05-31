@@ -25,3 +25,13 @@ pnpm-debug.log*
 
 # pagefind
 public/pagefind
+
+# Obsidian local vault state
+src/content/.obsidian/workspace*.json
+src/content/.obsidian/cache/
+src/content/.obsidian/plugins/
+src/content/.trash/
+
+# Private or unfinished Obsidian writing areas
+src/content/drafts/
+src/content/inbox/

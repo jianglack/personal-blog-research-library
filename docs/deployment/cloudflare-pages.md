@@ -97,6 +97,9 @@ src/content/
 Use this folder only for public material. Do not sync a private vault directly into
 the repository, because Cloudflare Pages will deploy whatever is committed.
 
+Detailed writing workflow and templates are documented in
+`docs/writing/obsidian-workflow.md`.
+
 ## Long-Term Free Operation
 
 This site is designed to stay static, so it does not need a rented server. To keep
