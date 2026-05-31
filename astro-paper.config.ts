@@ -4,7 +4,7 @@ export default defineAstroPaperConfig({
   site: {
     url: "https://personal-blog-research-library.pages.dev/",
     title: "LouisJiang",
-    description: "软工转大模型，记录技术学习、博客写作和自我感想随笔。",
+    description: "记录技术学习、博客写作和自我感想随笔。",
     author: "louis",
     profile: "https://github.com/jianglack",
     ogImage: "og.png",
