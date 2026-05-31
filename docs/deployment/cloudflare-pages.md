@@ -11,11 +11,57 @@
 ## Repository Flow
 
 1. Push this repository to GitHub.
-2. Create a Cloudflare Pages project from the GitHub repository.
-3. Set the framework preset to Astro.
-4. Set the build command to `pnpm build`.
-5. Set the output directory to `dist`.
-6. Deploy.
+2. Deploy through one of the supported flows below.
+
+### Direct Upload With GitHub Actions
+
+The current production project was created as a Cloudflare Pages Direct Upload
+project. Cloudflare does not allow converting a Direct Upload project into a
+Git-connected project in place, so the repository uses GitHub Actions to keep the
+same Pages project and URL while still deploying automatically on each push to
+`master`.
+
+GitHub Actions workflow:
+
+```text
+.github/workflows/deploy-cloudflare-pages.yml
+```
+
+Required GitHub repository secret:
+
+```text
+CLOUDFLARE_API_TOKEN
+```
+
+Create the token in Cloudflare with these account-scoped permissions:
+
+```text
+Account > Cloudflare Pages > Edit
+Account > Account Settings > Read
+```
+
+Limit the resource scope to the production account:
+
+```text
+be4769c6896b8ef635e984df24c84e8e
+```
+
+The workflow builds the site with `pnpm build`, then runs:
+
+```powershell
+wrangler pages deploy dist --project-name=personal-blog-research-library --branch=master
+```
+
+### Native Cloudflare Git Integration
+
+Cloudflare can also create a Pages project directly from a GitHub repository via
+Workers & Pages > Create application > Pages > Import an existing Git repository.
+That flow requires the Cloudflare Workers and Pages GitHub App to be installed on
+the GitHub account and granted access to the repository.
+
+Use this only if you are willing to create a new Cloudflare Pages project or
+replace the current Direct Upload project. The existing Direct Upload project
+cannot be switched to Git source in place.
 
 ## Static Site Constraints
 
@@ -33,7 +79,7 @@
 3. Run `pnpm test`.
 4. Run `pnpm build`.
 5. Commit and push.
-6. Cloudflare Pages builds and publishes the static site.
+6. GitHub Actions builds the site and uploads `dist/` to Cloudflare Pages.
 
 ## Obsidian Vault Guidance
 
