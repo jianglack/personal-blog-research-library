@@ -1,12 +1,12 @@
 ---
 import { getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import IconRss from "@/assets/icons/IconRss.svg";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ContentList from "@/components/ContentList.astro";
 import LinkButton from "@/components/LinkButton.astro";
+import Socials from "@/components/Socials.astro";
 import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import { filterPublicEntries, sortByDateDesc } from "@/utils/researchLibrary";
@@ -84,20 +84,7 @@ const homePath = getRelativeLocaleUrl(locale, "");
             decoding="async"
             loading="eager"
           />
-          <a
-            target="_blank"
-            href={getAssetPath("rss.xml")}
-            class="inline-block"
-            aria-label="RSS 订阅"
-            title="RSS 订阅"
-          >
-            <IconRss
-              width={20}
-              height={20}
-              class="stroke-accent scale-125 stroke-3 rtl:-rotate-90"
-            />
-            <span class="sr-only">RSS 订阅</span>
-          </a>
+          <Socials />
         </div>
       </div>
     </section>
