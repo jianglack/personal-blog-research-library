@@ -127,5 +127,5 @@ Any push to `master` runs tests, builds the Astro site, and uploads `dist/` to
 Cloudflare Pages. The live site is:
 
 ```text
-https://personal-blog-research-library.pages.dev/
+https://louisjiang.pages.dev/
 ```

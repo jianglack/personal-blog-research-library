@@ -27,6 +27,7 @@ pnpm-debug.log*
 public/pagefind
 
 # Obsidian local vault state
+src/content/.obsidian/
 src/content/.obsidian/workspace*.json
 src/content/.obsidian/cache/
 src/content/.obsidian/plugins/

@@ -49,7 +49,7 @@ be4769c6896b8ef635e984df24c84e8e
 The workflow builds the site with `pnpm build`, then runs:
 
 ```powershell
-wrangler pages deploy dist --project-name=personal-blog-research-library --branch=master
+wrangler pages deploy dist --project-name=louisjiang --branch=master
 ```
 
 ### Native Cloudflare Git Integration
@@ -136,7 +136,7 @@ The production Cloudflare Pages URL is already configured in
 
 ```ts
 site: {
-  url: "https://personal-blog-research-library.pages.dev/",
+  url: "https://louisjiang.pages.dev/",
 }
 ```
 

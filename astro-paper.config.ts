@@ -2,7 +2,7 @@ import { defineAstroPaperConfig } from "./src/types/config";
 
 export default defineAstroPaperConfig({
   site: {
-    url: "https://personal-blog-research-library.pages.dev/",
+    url: "https://louisjiang.pages.dev/",
     title: "LouisJiang",
     description: "记录技术学习、博客写作和自我感想随笔。",
     author: "louis",

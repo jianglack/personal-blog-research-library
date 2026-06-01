@@ -16,7 +16,7 @@ concurrency:
 
 env:
   CLOUDFLARE_ACCOUNT_ID: be4769c6896b8ef635e984df24c84e8e
-  CLOUDFLARE_PROJECT_NAME: personal-blog-research-library
+  CLOUDFLARE_PROJECT_NAME: louisjiang
 
 jobs:
   deploy:
