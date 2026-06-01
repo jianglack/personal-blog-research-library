@@ -1,17 +1,17 @@
 ---
-title: "LLM Reasoning"
-description: "Notes on reasoning, search, verification, and test-time compute for language models."
-lang: en
+title: "大模型推理"
+description: "记录大模型推理、搜索、验证和 test-time compute 相关问题。"
+lang: zh
 featured: true
-tags: ["LLM", "Reasoning"]
+tags: ["LLM", "推理"]
 readingPath:
-  - "Start with test-time compute."
-  - "Compare sampling, search, and verifier-based methods."
-  - "Track open questions around cost and reliability."
+  - "先从 test-time compute 的基本方法开始。"
+  - "比较采样、搜索和验证器方法的差异。"
+  - "持续记录成本、延迟和可靠性之间的权衡。"
 keyQuestions:
-  - "When does more inference-time compute improve answer quality?"
-  - "How should reasoning traces be evaluated?"
+  - "什么时候增加推理时计算真的能提高答案质量？"
+  - "推理过程应该如何评估？"
 draft: false
 ---
 
-This topic collects long-form notes and resources about language model reasoning.
+这个主题收集大模型推理相关的长文、学习笔记和资源。
