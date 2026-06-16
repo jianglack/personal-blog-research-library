@@ -31,7 +31,7 @@ templates/   Obsidian note templates, not published
 3. Link related topics and series through frontmatter slugs.
 4. Preview locally with `pnpm dev` when layout matters.
 5. Before publishing, set `draft: false`.
-6. In Obsidian, run `Git: Commit-and-sync` from the command palette.
+6. In Obsidian, press `Ctrl + Shift + G` to run `Git: Commit-and-sync`.
 7. GitHub Actions runs tests, builds the site, and deploys to Cloudflare Pages.
 
 ## Obsidian Git Semi-Automatic Publishing
@@ -50,7 +50,13 @@ That means Obsidian will not publish while you are still writing. When a note is
 ready, set `draft: false`, then manually run:
 
 ```text
-Ctrl + P -> Git: Commit-and-sync
+Ctrl + Shift + G
+```
+
+If the shortcut does not work, open the command palette with:
+
+```text
+Ctrl + Shift + P -> Git: Commit-and-sync
 ```
 
 The command stages the content changes, creates a commit, pulls remote updates,

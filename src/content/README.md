@@ -20,19 +20,25 @@ https://louisjiang.pages.dev/
 2. 正式文章放到 `posts/`。
 3. 草稿阶段保持 `draft: true`。
 4. 准备发布时改成 `draft: false`。
-5. 在 Obsidian 里打开命令面板：
+5. 在 Obsidian 里执行同步：
 
 ```text
-Ctrl + P
+Ctrl + Shift + G
 ```
 
-6. 执行：
+这个快捷键对应 Obsidian Git 的：
 
 ```text
 Git: Commit-and-sync
 ```
 
-7. GitHub Actions 会自动检查、构建并部署到 Cloudflare Pages。
+也可以用命令面板搜索执行：
+
+```text
+Ctrl + Shift + P -> Git: Commit-and-sync
+```
+
+6. GitHub Actions 会自动检查、构建并部署到 Cloudflare Pages。
 
 Obsidian Git 插件已经按半自动方式配置：
 
@@ -158,7 +164,7 @@ http://127.0.0.1:4324/
 只要在 Obsidian 里执行：
 
 ```text
-Git: Commit-and-sync
+Ctrl + Shift + G
 ```
 
 流程就是：
