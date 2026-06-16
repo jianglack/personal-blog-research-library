@@ -31,10 +31,39 @@ templates/   Obsidian note templates, not published
 3. Link related topics and series through frontmatter slugs.
 4. Preview locally with `pnpm dev` when layout matters.
 5. Before publishing, set `draft: false`.
-6. Run `pnpm test`.
-7. Run `pnpm build`.
-8. Commit and push to `master`.
-9. GitHub Actions deploys the site to Cloudflare Pages.
+6. In Obsidian, run `Git: Commit-and-sync` from the command palette.
+7. GitHub Actions runs tests, builds the site, and deploys to Cloudflare Pages.
+
+## Obsidian Git Semi-Automatic Publishing
+
+This vault uses the Obsidian Git plugin as the normal publishing path. The
+plugin is configured for manual sync:
+
+- Automatic commit interval: `0`
+- Automatic push interval: `0`
+- Automatic pull interval: `0`
+- Push on commit-and-sync: enabled
+- Pull on commit-and-sync: enabled
+- Commit message: `content: sync obsidian notes {{date}}`
+
+That means Obsidian will not publish while you are still writing. When a note is
+ready, set `draft: false`, then manually run:
+
+```text
+Ctrl + P -> Git: Commit-and-sync
+```
+
+The command stages the content changes, creates a commit, pulls remote updates,
+and pushes to GitHub. The existing GitHub Actions workflow then handles the
+quality gate and deployment.
+
+Use local commands only when you want extra confidence before syncing:
+
+```powershell
+cd D:\personal-blog-research-library
+pnpm test
+pnpm build
+```
 
 ## Publishing Rules
 

@@ -14,34 +14,40 @@ D:\personal-blog-research-library\src\content
 https://louisjiang.pages.dev/
 ```
 
-## 最短发布流程
+## 最短发布流程：Obsidian Git 半自动同步
 
 1. 在 Obsidian 里写 Markdown。
 2. 正式文章放到 `posts/`。
 3. 草稿阶段保持 `draft: true`。
 4. 准备发布时改成 `draft: false`。
-5. 回到项目根目录：
+5. 在 Obsidian 里打开命令面板：
 
-```powershell
-cd D:\personal-blog-research-library
+```text
+Ctrl + P
 ```
 
-6. 本地检查：
+6. 执行：
 
-```powershell
-pnpm test
-pnpm build
+```text
+Git: Commit-and-sync
 ```
 
-7. 提交并上传：
+7. GitHub Actions 会自动检查、构建并部署到 Cloudflare Pages。
 
-```powershell
-git add .
-git commit -m "content: add new note"
-git push origin master
+Obsidian Git 插件已经按半自动方式配置：
+
+- 不自动提交。
+- 不自动推送。
+- 手动执行 `Git: Commit-and-sync` 时，会提交、拉取远端更新并推送到 GitHub。
+- 默认提交信息是 `content: sync obsidian notes {{date}}`。
+
+如果 Obsidian 没看到 Git 命令，重启 Obsidian 后进入：
+
+```text
+设置 -> 第三方插件 -> Git
 ```
 
-8. GitHub Actions 会自动部署到 Cloudflare Pages。
+确认插件已启用。
 
 ## 常用文件夹
 
@@ -143,14 +149,16 @@ http://127.0.0.1:4324/
 - `pnpm test` 通过。
 - `pnpm build` 通过。
 
+日常小改动可以直接用 Obsidian Git 同步，让 GitHub Actions 在云端执行检查和构建。改了很多文件、加了图片、或者不确定页面效果时，再手动运行本地预览和构建。
+
 ## 自动部署
 
 你不需要手动上传 Cloudflare。
 
-只要执行：
+只要在 Obsidian 里执行：
 
-```powershell
-git push origin master
+```text
+Git: Commit-and-sync
 ```
 
 流程就是：
