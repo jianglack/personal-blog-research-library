@@ -1,21 +1,21 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import Socials from "./Socials.astro";
 
 type Props = {
   noMarginTop?: boolean;
 } & HTMLAttributes<"footer">;
 
-const { noMarginTop = false, class: className, ...attrs } = Astro.props;
+const { noMarginTop = true, class: className, ...attrs } = Astro.props;
 ---
 
 <footer
-  class:list={["app-layout", { "mt-auto": !noMarginTop }, className]}
+  class:list={["mag-footer app-layout", { "mt-auto": !noMarginTop }, className]}
   {...attrs}
 >
-  <div
-    class="border-border flex flex-col items-center justify-between border-t py-6 sm:flex-row-reverse sm:py-4"
-  >
-    <Socials />
+  <div class="mag-footer-inner">
+    <a href="mailto:zslouis8605@gmail.com">zslouis8605@gmail.com</a>
+    <a href="https://github.com/jianglack" rel="me noopener noreferrer">
+      github.com/jianglack
+    </a>
   </div>
 </footer>

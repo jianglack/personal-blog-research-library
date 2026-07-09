@@ -4,7 +4,7 @@ export default defineAstroPaperConfig({
   site: {
     url: "https://louisjiang.pages.dev/",
     title: "LouisJiang",
-    description: "记录技术学习、博客写作和自我感想随笔。",
+    description: "Technical notes, writing, and personal reflections.",
     author: "louis",
     profile: "https://github.com/jianglack",
     ogImage: "og.png",
@@ -18,7 +18,7 @@ export default defineAstroPaperConfig({
     scheduledPostMargin: 15 * 60 * 1000,
   },
   features: {
-    lightAndDarkMode: true,
+    lightAndDarkMode: false,
     dynamicOgImage: false,
     showArchives: true,
     showBackButton: true,
@@ -40,6 +40,9 @@ export default defineAstroPaperConfig({
     },
   ],
   shareLinks: [
-    { name: "mail", url: "mailto:?subject=%E5%88%86%E4%BA%AB%E8%BF%99%E7%AF%87%E6%96%87%E7%AB%A0&body=" },
+    {
+      name: "mail",
+      url: "mailto:?subject=Sharing this post&body=",
+    },
   ],
 });

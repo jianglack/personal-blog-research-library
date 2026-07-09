@@ -37,8 +37,7 @@ const rssHref = getAssetPath("rss.xml");
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href={getAssetPath("favicon.svg")} />
-    <link rel="icon" href={getAssetPath("favicon.ico")} />
+    <link rel="icon" type="image/png" href={getAssetPath("favicon.png")} />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 
@@ -99,25 +98,16 @@ const rssHref = getAssetPath("rss.xml");
     -->
     <script is:inline>
       (function () {
-        const stored = localStorage.getItem("theme");
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        const theme = stored ?? (prefersDark ? "dark" : "light");
-        document.firstElementChild?.setAttribute("data-theme", theme);
-        // Expose value so theme.ts can skip re-detection.
-        window.__theme = { value: theme };
+        document.firstElementChild?.setAttribute("data-theme", "light");
+        window.__theme = { value: "light" };
       })();
     </script>
 
     <ClientRouter />
   </head>
   <body
-    class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col"
+    class="font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col"
   >
     <slot />
-    <script>
-      import "@/scripts/theme";
-    </script>
   </body>
 </html>

@@ -22,7 +22,7 @@
 }
 
 @utility max-w-app {
-  @apply max-w-3xl;
+  @apply max-w-6xl;
 }
 
 @utility app-layout {
@@ -30,9 +30,217 @@
 }
 
 @utility active-nav {
-  @apply underline decoration-wavy decoration-2 underline-offset-8;
+  @apply text-foreground;
 }
 
 :target {
   scroll-margin-block: 1rem;
+}
+
+:root {
+  --mag-ink: #101010;
+  --mag-paper: #f7f7f2;
+  --mag-bg: #ecebe5;
+  --mag-muted: #66645f;
+  --mag-line: #d9d7cf;
+  --mag-red: #d01f27;
+}
+
+body {
+  background: var(--mag-bg);
+}
+
+.mag-heavy {
+  font-family:
+    Impact, "Arial Black", Haettenschweiler, "Noto Sans SC",
+    "Microsoft YaHei UI", sans-serif;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.mag-frame {
+  border-inline: 1px solid var(--mag-ink);
+  background: var(--mag-paper);
+}
+
+.mag-header {
+  color: var(--mag-ink);
+}
+
+.mag-header-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.25rem;
+  align-items: center;
+  border: 1px solid var(--mag-ink);
+  background: var(--mag-paper);
+  padding: 1.125rem 1.375rem;
+}
+
+.mag-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--mag-ink);
+  font-size: 1.15rem;
+  text-decoration: none;
+}
+
+.mag-brand::before {
+  content: "";
+  width: 0.75rem;
+  height: 0.75rem;
+  background: var(--mag-red);
+}
+
+.mag-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: var(--mag-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.mag-nav a:hover,
+.mag-nav .active-nav {
+  color: var(--mag-ink);
+}
+
+.mag-menu-button {
+  display: none;
+}
+
+.mag-footer {
+  color: var(--mag-muted);
+}
+
+.mag-footer-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+  border-inline: 1px solid var(--mag-ink);
+  border-top: 1px solid var(--mag-ink);
+  border-bottom: 1px solid var(--mag-ink);
+  background: var(--mag-paper);
+  padding: 1.125rem 1.375rem;
+  font-size: 0.8125rem;
+}
+
+.mag-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0 0 1.125rem;
+  color: var(--mag-ink);
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+  line-height: 0.9;
+}
+
+.mag-section-title::before {
+  content: "";
+  width: 0.5625rem;
+  height: 0.5625rem;
+  background: var(--mag-red);
+}
+
+.mag-topic-button {
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid var(--mag-ink);
+  background: transparent;
+  padding: 0.0625rem 0.75rem 0;
+  color: var(--mag-ink);
+  font-size: 1.08rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.mag-topic-button[data-active="true"] {
+  background: var(--mag-ink);
+  color: var(--mag-paper);
+}
+
+.mag-topic-label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  transform: translateY(0.02em);
+}
+
+.mag-topic-count {
+  display: inline-flex;
+  align-items: center;
+  color: var(--mag-red);
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  transform: translateY(0.02em);
+}
+
+.mag-topic-button[data-active="true"] .mag-topic-count {
+  color: color-mix(in srgb, var(--mag-paper) 85%, transparent);
+}
+
+.mag-post-description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.mag-post-list {
+  border-top: 1px solid var(--mag-ink);
+}
+
+.mag-post-list[data-empty="true"] {
+  border-top: 0;
+}
+
+.mag-post-item[data-visible-separator="true"] {
+  border-bottom: 1px solid var(--mag-ink);
+}
+
+.mag-tag {
+  justify-self: end;
+  align-self: start;
+  border: 1px solid var(--mag-ink);
+  padding: 0.3125rem 0.5rem;
+  color: var(--mag-red);
+  font-size: 0.75rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .mag-header-inner,
+  .mag-footer-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .mag-menu-button {
+    display: inline-flex;
+    justify-self: end;
+    padding: 0.5rem;
+  }
+
+  .mag-nav {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mag-nav[data-open="true"] {
+    display: flex;
+  }
+
+  .mag-tag {
+    justify-self: start;
+  }
 }

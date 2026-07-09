@@ -2,8 +2,6 @@
 import { getEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
-import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import config from "@/config";
 import { getAssetPath } from "@/utils/withBase";
@@ -27,19 +25,32 @@ const { Content } = await render(about);
 >
   <Header />
 
-  <Breadcrumb />
+  <main id="main-content" class="app-layout py-8">
+    <section class="mag-frame p-6 sm:p-10">
+      <div class="mb-8 flex items-center gap-4">
+        <img
+          src={getAssetPath("avatar.png")}
+          alt="Louis"
+          width="96"
+          height="96"
+          class="size-24 border border-[var(--mag-ink)] object-cover"
+          decoding="async"
+        />
+        <div>
+          <p class="text-sm font-black text-[var(--mag-red)] uppercase">
+            About
+          </p>
+          <h1 class="text-4xl font-normal text-[var(--mag-ink)]">
+            {about.data.title}
+          </h1>
+        </div>
+      </div>
 
-  <Main pageTitle={about.data.title} class="app-prose">
-    <img
-      src={getAssetPath("avatar.jpg")}
-      alt="louis 的头像"
-      width="128"
-      height="128"
-      class="border-border mb-8 size-32 rounded-full border object-cover"
-      decoding="async"
-    />
-    <Content />
-  </Main>
+      <article class="app-prose max-w-3xl">
+        <Content />
+      </article>
+    </section>
+  </main>
 
   <Footer />
 </Layout>
