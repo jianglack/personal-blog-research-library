@@ -352,6 +352,40 @@ h1::before,
   align-self: start;
 }
 
+.card-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.publish-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.publish-pill.published {
+  color: var(--green);
+}
+
+.publish-pill.unpublished,
+.publish-pill.staged,
+.publish-pill.changed {
+  color: var(--red);
+}
+
+.publish-pill.draft {
+  color: var(--amber);
+}
+
 .pill-row {
   display: flex;
   flex-wrap: wrap;

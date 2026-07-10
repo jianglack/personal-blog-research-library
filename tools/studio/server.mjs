@@ -89,14 +89,18 @@ function tryListen(port) {
 async function handleApi(request, response, url) {
   if (request.method === "GET" && url.pathname === "/api/content") {
     const categories = await loadTopicCategories();
-    const items = addPostCategories(await listAllContent(), categories);
-    const topics = makeTopicSummaries(items, categories);
+    const gitStatus = await getGitStatusMap();
+    const items = addPublishStates(
+      addPostCategories(await listAllContent(), categories),
+      gitStatus,
+    );
+    const topics = makeTopicSummaries(items, categories, gitStatus);
     sendJson(response, 200, {
       ok: true,
       items,
       topics,
       topicFilters: makeCategoryFilters(items, categories),
-      counts: makeCounts(items),
+      counts: makeCounts(items, topics),
       siteUrl,
       localPreviewUrl,
     });
@@ -108,9 +112,13 @@ async function handleApi(request, response, url) {
     if (!filePath) throw new Error("Missing path.");
     if (filePath.startsWith("topic:")) {
       const categories = await loadTopicCategories();
-      const items = addPostCategories(await listAllContent(), categories);
+      const gitStatus = await getGitStatusMap();
+      const items = addPublishStates(
+        addPostCategories(await listAllContent(), categories),
+        gitStatus,
+      );
       const slug = filePath.slice("topic:".length);
-      const topic = makeTopicSummaries(items, categories).find(item => item.slug === slug);
+      const topic = makeTopicSummaries(items, categories, gitStatus).find(item => item.slug === slug);
       if (!topic) throw new Error("Topic category not found.");
       sendJson(response, 200, { ok: true, item: topic });
       return;
@@ -243,7 +251,10 @@ async function listCollection(collection) {
 
 async function readContentItem(filePath) {
   const absolute = contentPath(filePath);
-  return summarizeSource(toContentRelative(absolute), await readFile(absolute, "utf8"), true);
+  return addPublishState(
+    summarizeSource(toContentRelative(absolute), await readFile(absolute, "utf8"), true),
+    await getGitStatusMap(),
+  );
 }
 
 async function saveContent(payload) {
@@ -535,10 +546,10 @@ function toContentRelative(absolute) {
   return normalizeSlash(path.relative(contentDir, absolute));
 }
 
-function makeCounts(items) {
+function makeCounts(items, topics = []) {
   return {
     posts: items.filter(item => item.collection === "posts").length,
-    topics: items.filter(item => item.collection === "topics").length,
+    topics: topics.length,
     series: items.filter(item => item.collection === "series").length,
     resources: items.filter(item => item.collection === "resources").length,
     drafts: items.filter(item => item.draft).length,
@@ -590,47 +601,149 @@ async function saveTopicCategory(data, existingPath) {
     "utf8",
   );
 
-  const items = addPostCategories(await listAllContent(), nextCategories);
-  return makeTopicSummaries(items, nextCategories).find(topic => topic.slug === slug);
+  const gitStatus = await getGitStatusMap();
+  const items = addPublishStates(
+    addPostCategories(await listAllContent(), nextCategories),
+    gitStatus,
+  );
+  return makeTopicSummaries(items, nextCategories, gitStatus).find(topic => topic.slug === slug);
 }
 
-function makeTopicSummaries(items, categories) {
+function makeTopicSummaries(items, categories, gitStatus = new Map()) {
   const posts = items.filter(item => item.collection === "posts");
 
   return categories
-    .map(category => ({
-      path: `topic:${category.slug}`,
-      gitPath: path.relative(rootDir, topicCategoriesPath),
-      collection: "topics",
-      slug: category.slug,
-      title: category.label,
-      description: category.description,
-      patterns: category.patterns,
-      draft: false,
-      featured: false,
-      body: "",
-      route: {
+    .map(category => {
+      const gitPath = normalizeSlash(path.relative(rootDir, topicCategoriesPath));
+      return {
         path: `topic:${category.slug}`,
-        publicPath: `/topics/${category.slug}/`,
-        publicUrl: `${siteUrl.replace(/\/+$/, "")}/topics/${encodeURIComponent(category.slug)}/`,
-        localPreviewUrl: `${localPreviewUrl.replace(/\/+$/, "")}/topics/${encodeURIComponent(category.slug)}/`,
-      },
-      posts: posts
-        .filter(post => post.category === category.slug)
-        .map(post => ({
-          path: post.path,
-          title: post.title,
-          date: post.date,
-          draft: post.draft,
-        })),
-      resources: [],
-    }));
+        gitPath,
+        collection: "topics",
+        slug: category.slug,
+        title: category.label,
+        description: category.description,
+        patterns: category.patterns,
+        draft: false,
+        featured: false,
+        body: "",
+        publishState: makePublishState(gitPath, false, gitStatus),
+        route: {
+          path: `topic:${category.slug}`,
+          publicPath: `/topics/${category.slug}/`,
+          publicUrl: `${siteUrl.replace(/\/+$/, "")}/topics/${encodeURIComponent(category.slug)}/`,
+          localPreviewUrl: `${localPreviewUrl.replace(/\/+$/, "")}/topics/${encodeURIComponent(category.slug)}/`,
+        },
+        posts: posts
+          .filter(post => post.category === category.slug)
+          .map(post => ({
+            path: post.path,
+            title: post.title,
+            date: post.date,
+            draft: post.draft,
+            publishState: post.publishState,
+          })),
+        resources: [],
+      };
+    });
 }
 
 function addPostCategories(items, categories) {
   return items.map(item =>
     item.collection === "posts" ? { ...item, category: getPostCategory(item, categories) } : item,
   );
+}
+
+function addPublishStates(items, gitStatus) {
+  return items.map(item => addPublishState(item, gitStatus));
+}
+
+function addPublishState(item, gitStatus) {
+  const gitPath = contentGitPath(item.path);
+  return {
+    ...item,
+    publishState: makePublishState(gitPath, item.draft, gitStatus),
+  };
+}
+
+function makePublishState(gitPath, draft, gitStatus) {
+  const normalized = normalizeSlash(gitPath);
+  const code = gitStatus.get(normalized) ?? "";
+
+  if (draft) {
+    return {
+      kind: "draft",
+      label: "DRAFT",
+      detail: "草稿不会出现在公开博客里。",
+      gitPath: normalized,
+      gitCode: code,
+    };
+  }
+
+  if (!code) {
+    return {
+      kind: "published",
+      label: "PUBLISHED",
+      detail: "已提交，当前本地没有未发布改动。",
+      gitPath: normalized,
+      gitCode: code,
+    };
+  }
+
+  if (code === "??") {
+    return {
+      kind: "unpublished",
+      label: "NOT PUBLISHED",
+      detail: "新文件还没有提交和推送。",
+      gitPath: normalized,
+      gitCode: code,
+    };
+  }
+
+  if (code[0] !== " ") {
+    return {
+      kind: "staged",
+      label: "STAGED",
+      detail: "已暂存，但 commit/push 没有完成。",
+      gitPath: normalized,
+      gitCode: code,
+    };
+  }
+
+  return {
+    kind: "changed",
+    label: "CHANGED",
+    detail: "本地有修改，还没有提交和推送。",
+    gitPath: normalized,
+    gitCode: code,
+  };
+}
+
+async function getGitStatusMap() {
+  const result = await runCommand("git", ["status", "--porcelain=v1", "-z", "--untracked-files=all"]);
+  if (result.code !== 0) return new Map();
+  return parseGitStatus(result.stdout);
+}
+
+function parseGitStatus(output) {
+  const status = new Map();
+  const entries = output.split("\0").filter(Boolean);
+
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    const code = entry.slice(0, 2);
+    const filePath = normalizeSlash(entry.slice(3));
+    status.set(filePath, code);
+
+    if (code[0] === "R" || code[0] === "C") {
+      index += 1;
+    }
+  }
+
+  return status;
+}
+
+function contentGitPath(filePath) {
+  return normalizeSlash(path.relative(rootDir, path.join(contentDir, filePath)));
 }
 
 function makeCategoryFilters(items, categories) {
@@ -745,9 +858,14 @@ async function runCommands(commands) {
 
 function runCommand(command, args) {
   return new Promise(resolve => {
-    const child = spawn(command, args, {
+    const useWindowsCmd = process.platform === "win32" && command === "pnpm";
+    const executable = useWindowsCmd ? process.env.ComSpec || "cmd.exe" : command;
+    const commandArgs = useWindowsCmd
+      ? ["/d", "/s", "/c", "pnpm.cmd", ...args]
+      : args;
+    const child = spawn(executable, commandArgs, {
       cwd: rootDir,
-      shell: process.platform === "win32",
+      shell: false,
       env: process.env,
     });
     let stdout = "";
@@ -758,6 +876,9 @@ function runCommand(command, args) {
     });
     child.stderr.on("data", chunk => {
       stderr += chunk.toString();
+    });
+    child.on("error", error => {
+      resolve({ code: 1, stdout, stderr: `${stderr}${error.message}` });
     });
     child.on("close", code => {
       resolve({ code: code ?? 1, stdout, stderr });

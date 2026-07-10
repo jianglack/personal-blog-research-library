@@ -356,11 +356,12 @@ function renderArticleOverview() {
   const label = state.selectedTopicFilter === "all"
     ? "全部文章"
     : `当前分类：${filterTitle(state.selectedTopicFilter)}`;
+  const statusText = publishSummary(posts);
 
   elements.modeOverview.innerHTML = `
     <div class="overview-head">
       <h3>Article Queue</h3>
-      <span>${escapeHtml(label)} / ${posts.length} 篇</span>
+      <span>${escapeHtml(label)} / ${posts.length} 篇 / ${escapeHtml(statusText)}</span>
     </div>
     <div class="overview-grid">
       ${posts.length ? posts.map(renderMiniContentCard).join("") : `<div class="empty-note">这个主题分类下还没有文章。</div>`}
@@ -452,18 +453,54 @@ function renderResourceOverview() {
 }
 
 function renderMiniContentCard(item) {
-  const status = item.draft ? "draft" : "ready";
+  const publish = normalizedPublishState(item);
   const topic = item.category ? filterTitle(item.category) : "未选择主题分类";
   return `
     <article class="overview-card">
       <div>
-        <strong>${escapeHtml(item.title)}</strong>
-        <div class="mini-meta">${escapeHtml(status)} / ${escapeHtml(topic)} / ${escapeHtml(item.path)}</div>
+        <div class="card-title-row">
+          <strong>${escapeHtml(item.title)}</strong>
+          <span class="publish-pill ${escapeHtml(publish.kind)}">${escapeHtml(publish.label)}</span>
+        </div>
+        <div class="mini-meta">${escapeHtml(topic)} / ${escapeHtml(item.path)}</div>
+        <div class="mini-meta">${escapeHtml(publish.detail)}</div>
         <div class="overview-note">${escapeHtml(item.description || "没有描述")}</div>
       </div>
       <button class="mini-action" type="button" data-open-path="${escapeHtml(item.path)}">Open</button>
     </article>
   `;
+}
+
+function publishSummary(items) {
+  const counts = items.reduce((result, item) => {
+    const kind = normalizedPublishState(item).kind;
+    result[kind] = (result[kind] ?? 0) + 1;
+    return result;
+  }, {});
+
+  return [
+    counts.published ? `已发布 ${counts.published}` : "",
+    counts.unpublished ? `未发布 ${counts.unpublished}` : "",
+    counts.staged ? `已暂存 ${counts.staged}` : "",
+    counts.changed ? `有修改 ${counts.changed}` : "",
+    counts.draft ? `草稿 ${counts.draft}` : "",
+  ].filter(Boolean).join(" / ") || "无文章";
+}
+
+function normalizedPublishState(item) {
+  if (item.publishState) return item.publishState;
+  if (item.draft) {
+    return {
+      kind: "draft",
+      label: "DRAFT",
+      detail: "草稿不会出现在公开博客里。",
+    };
+  }
+  return {
+    kind: "unknown",
+    label: "UNKNOWN",
+    detail: "还没有读取到 Git 发布状态。",
+  };
 }
 
 function startNew(collection) {
@@ -723,6 +760,9 @@ async function save(action) {
     }
 
     state.lastOutput = response.output || response.message || (response.ok ? "Done." : response.error);
+    if (!response.ok && response.error && response.output) {
+      state.lastOutput = `${response.error}\n\n${response.output}`;
+    }
     renderAll();
   } catch (error) {
     state.lastOutput = error instanceof Error ? error.message : String(error);
