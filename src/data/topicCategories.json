@@ -4,25 +4,62 @@
       "slug": "ai",
       "label": "AI",
       "description": "Large language models, reasoning, model evaluation, and AI tools.",
-      "patterns": ["ai", "llm", "大模型", "推理", "reasoning", "compute"]
+      "patterns": [
+        "ai",
+        "llm",
+        "大模型",
+        "推理",
+        "reasoning",
+        "compute"
+      ]
     },
     {
       "slug": "systems",
       "label": "SYSTEMS",
       "description": "Systems engineering, architecture, tooling, deployment, and maintainability.",
-      "patterns": ["system", "systems", "系统", "工程", "架构", "cloudflare", "astro"]
+      "patterns": [
+        "system",
+        "systems",
+        "系统",
+        "工程",
+        "架构",
+        "cloudflare",
+        "astro"
+      ]
     },
     {
-      "slug": "writing",
-      "label": "WRITING",
+      "slug": "test",
+      "label": "test",
       "description": "Writing, speaking, expression, communication, and long-form thinking.",
-      "patterns": ["writing", "写作", "表达", "演讲", "沟通", "communication"]
+      "patterns": [
+        "test",
+        "test"
+      ]
     },
     {
       "slug": "planning",
       "label": "PLANNING",
       "description": "Life planning, reflection, personal strategy, and long-term practice.",
-      "patterns": ["planning", "规划", "人生", "复盘", "plan"]
+      "patterns": [
+        "planning",
+        "规划",
+        "人生",
+        "复盘",
+        "plan"
+      ]
+    },
+    {
+      "slug": "philosophy",
+      "label": "PHILOSOPHY",
+      "description": "Philosophy, Nietzsche, self-overcoming, value creation, and long-term reflection.",
+      "patterns": [
+        "philosophy",
+        "哲学",
+        "尼采",
+        "nietzsche",
+        "self-overcoming",
+        "价值创造"
+      ]
     }
   ]
 }
