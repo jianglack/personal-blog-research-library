@@ -1,24 +1,28 @@
 ---
 import { getCollection } from "astro:content";
-import { getRelativeLocaleUrl } from "astro:i18n";
 import ContentList from "@/components/ContentList.astro";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
 import config from "@/config";
 import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
-import { filterPublicEntries, sortByDateDesc } from "@/utils/researchLibrary";
+import { sortByDateDesc } from "@/utils/researchLibrary";
+import {
+  getTopicCategory,
+  getTopicCategoryBySlug,
+  topicCategories,
+} from "@/utils/topicCategories";
 
 const locale = Astro.currentLocale ?? config.site.lang;
 
-export async function getStaticPaths() {
-  const topics = filterPublicEntries(await getCollection("topics"));
-  return topics.map(topic => ({
-    params: { slug: topic.id },
-    props: { topic },
+export function getStaticPaths() {
+  return topicCategories.map(category => ({
+    params: { slug: category.slug },
+    props: { category },
   }));
 }
 
-const { topic } = Astro.props;
+const { category } = Astro.props;
+const topic = getTopicCategoryBySlug(category.slug) ?? category;
 const formatDate = (date: Date) =>
   date.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
     year: "numeric",
@@ -27,60 +31,33 @@ const formatDate = (date: Date) =>
   });
 
 const posts = sortByDateDesc((await getCollection("posts")).filter(postFilter))
-  .filter(post => post.data.topics.includes(topic.id))
+  .filter(post => getTopicCategory(post.data).slug === topic.slug)
   .map(post => ({
     href: getPostUrl(post.id, post.filePath, locale),
     title: post.data.title,
     description: post.data.description,
     meta: formatDate(post.data.pubDatetime),
   }));
-
-const resources = filterPublicEntries(await getCollection("resources"))
-  .filter(resource => resource.data.topics.includes(topic.id))
-  .map(resource => ({
-    href: getRelativeLocaleUrl(locale, `resources/${resource.id}`),
-    title: resource.data.title,
-    description: resource.data.description,
-    meta: resource.data.type,
-  }));
 ---
 
 <ResearchLibraryLayout
-  title={topic.data.title}
-  description={topic.data.description}
-  lang={topic.data.lang}
+  title={topic.label}
+  description={topic.description}
+  lang={locale}
 >
-  <section class="mb-8 grid grid-cols-2 gap-3 text-sm">
+  <section class="mb-8 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
     <div class="border-border border p-4">
       <p class="text-foreground/70">Posts</p>
       <strong class="mt-2 block text-3xl">{posts.length}</strong>
     </div>
     <div class="border-border border p-4">
-      <p class="text-foreground/70">Resources</p>
-      <strong class="mt-2 block text-3xl">{resources.length}</strong>
+      <p class="text-foreground/70">Match</p>
+      <strong class="mt-2 block text-base uppercase">{topic.slug}</strong>
     </div>
   </section>
 
-  {
-    topic.data.readingPath.length > 0 && (
-      <section class="mb-8">
-        <h2 class="mb-3 text-xl font-semibold">阅读路径</h2>
-        <ol class="list-decimal space-y-2 pl-5">
-          {topic.data.readingPath.map(item => (
-            <li>{item}</li>
-          ))}
-        </ol>
-      </section>
-    )
-  }
-
-  <section class="mb-8">
-    <h2 class="mb-3 text-xl font-semibold">文章</h2>
-    <ContentList items={posts} emptyText="这个主题下还没有文章。" />
-  </section>
-
   <section>
-    <h2 class="mb-3 text-xl font-semibold">资源</h2>
-    <ContentList items={resources} emptyText="这个主题下还没有资源。" />
+    <h2 class="mb-3 text-xl font-semibold">Posts</h2>
+    <ContentList items={posts} emptyText="No posts in this topic yet." />
   </section>
 </ResearchLibraryLayout>

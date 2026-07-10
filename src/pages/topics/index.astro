@@ -4,37 +4,28 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import ContentList from "@/components/ContentList.astro";
 import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
 import config from "@/config";
-import { filterPublicEntries } from "@/utils/researchLibrary";
 import { postFilter } from "@/utils/postFilter";
+import { getTopicCategory, topicCategories } from "@/utils/topicCategories";
 
 const locale = Astro.currentLocale ?? config.site.lang;
 const posts = (await getCollection("posts")).filter(postFilter);
-const resources = filterPublicEntries(await getCollection("resources"));
 
-function getTopicMeta(topicId: string) {
-  const postCount = posts.filter(post => post.data.topics.includes(topicId)).length;
-  const resourceCount = resources.filter(resource =>
-    resource.data.topics.includes(topicId)
-  ).length;
+const topics = topicCategories.map(category => {
+  const count = posts.filter(post => getTopicCategory(post.data).slug === category.slug)
+    .length;
 
-  return resourceCount > 0
-    ? `${postCount} posts / ${resourceCount} resources`
-    : `${postCount} posts`;
-}
-
-const topics = filterPublicEntries(await getCollection("topics"))
-  .sort((a, b) => a.data.title.localeCompare(b.data.title, locale))
-  .map(topic => ({
-    href: getRelativeLocaleUrl(locale, `topics/${topic.id}`),
-    title: topic.data.title,
-    description: topic.data.description,
-    meta: getTopicMeta(topic.id),
-  }));
+  return {
+    href: getRelativeLocaleUrl(locale, `topics/${category.slug}`),
+    title: category.label,
+    description: category.description,
+    meta: `${count} posts`,
+  };
+});
 ---
 
 <ResearchLibraryLayout
-  title="主题"
-  description="长期关注的研究方向和学习路径。"
+  title="Topics"
+  description="The main categories used to organize posts on the blog."
 >
-  <ContentList items={topics} emptyText="还没有主题。" />
+  <ContentList items={topics} emptyText="No topics yet." />
 </ResearchLibraryLayout>

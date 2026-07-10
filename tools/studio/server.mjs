@@ -9,6 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "../..");
 const contentDir = path.join(rootDir, "src", "content");
 const publicDir = path.join(__dirname, "public");
+const topicCategoriesPath = path.join(rootDir, "src", "data", "topicCategories.json");
 const defaultPort = Number.parseInt(process.env.BLOG_STUDIO_PORT ?? "52621", 10);
 const siteUrl = process.env.BLOG_STUDIO_SITE_URL ?? "https://louisjiang.pages.dev";
 const localPreviewUrl = process.env.BLOG_STUDIO_LOCAL_URL ?? "http://127.0.0.1:4326";
@@ -87,13 +88,14 @@ function tryListen(port) {
 
 async function handleApi(request, response, url) {
   if (request.method === "GET" && url.pathname === "/api/content") {
-    const items = addPostCategories(await listAllContent());
-    const topics = makeTopicSummaries(items);
+    const categories = await loadTopicCategories();
+    const items = addPostCategories(await listAllContent(), categories);
+    const topics = makeTopicSummaries(items, categories);
     sendJson(response, 200, {
       ok: true,
       items,
       topics,
-      topicFilters: makeCategoryFilters(items),
+      topicFilters: makeCategoryFilters(items, categories),
       counts: makeCounts(items),
       siteUrl,
       localPreviewUrl,
@@ -104,6 +106,15 @@ async function handleApi(request, response, url) {
   if (request.method === "GET" && url.pathname === "/api/item") {
     const filePath = url.searchParams.get("path");
     if (!filePath) throw new Error("Missing path.");
+    if (filePath.startsWith("topic:")) {
+      const categories = await loadTopicCategories();
+      const items = addPostCategories(await listAllContent(), categories);
+      const slug = filePath.slice("topic:".length);
+      const topic = makeTopicSummaries(items, categories).find(item => item.slug === slug);
+      if (!topic) throw new Error("Topic category not found.");
+      sendJson(response, 200, { ok: true, item: topic });
+      return;
+    }
     sendJson(response, 200, {
       ok: true,
       item: await readContentItem(filePath),
@@ -159,7 +170,7 @@ async function handleApi(request, response, url) {
       return;
     }
 
-    const relativeToRoot = path.relative(rootDir, path.join(contentDir, saved.path));
+    const relativeToRoot = saved.gitPath ?? path.relative(rootDir, path.join(contentDir, saved.path));
     const branch = (await runCommand("git", ["branch", "--show-current"])).stdout.trim() || "master";
     const commitMessage = `content: publish ${saved.title}`;
     const git = await runCommands([
@@ -237,6 +248,10 @@ async function readContentItem(filePath) {
 
 async function saveContent(payload) {
   const data = normalizeContentData(payload.data);
+  if (data.collection === "topics") {
+    return saveTopicCategory(data, payload.mode === "edit" ? payload.filePath : undefined);
+  }
+
   const route = makeRoute(data, payload.mode === "edit" ? payload.filePath : undefined);
   const absolute = contentPath(route.path);
   await mkdir(path.dirname(absolute), { recursive: true });
@@ -417,6 +432,7 @@ function normalizeContentData(input = {}) {
   const collection = Object.hasOwn(collections, input.collection) ? input.collection : "posts";
   return {
     collection,
+    slug: String(input.slug ?? "").trim(),
     title: String(input.title ?? "").trim(),
     description: String(input.description ?? "").trim(),
     lang: input.lang === "en" ? "en" : "zh",
@@ -426,6 +442,7 @@ function normalizeContentData(input = {}) {
     posts: asStringArray(input.posts),
     readingPath: asStringArray(input.readingPath),
     keyQuestions: asStringArray(input.keyQuestions),
+    patterns: asStringArray(input.patterns ?? input.readingPath),
     resourceType: String(input.resourceType ?? input.type ?? "link").trim() || "link",
     url: String(input.url ?? "").trim(),
     draft: input.draft === true,
@@ -529,65 +546,106 @@ function makeCounts(items) {
   };
 }
 
-function makeTopicSummaries(items) {
-  const posts = items.filter(item => item.collection === "posts");
-  const resources = items.filter(item => item.collection === "resources");
+async function loadTopicCategories() {
+  const raw = await readFile(topicCategoriesPath, "utf8");
+  const parsed = JSON.parse(raw);
+  const categories = Array.isArray(parsed.categories) ? parsed.categories : [];
+  return categories.map(category => ({
+    slug: slugify(category.slug || category.label),
+    label: String(category.label ?? category.slug ?? "").trim(),
+    description: String(category.description ?? "").trim(),
+    patterns: asStringArray(category.patterns),
+  })).filter(category => category.slug && category.label);
+}
 
-  return items
-    .filter(item => item.collection === "topics")
-    .map(topic => ({
-      slug: topic.slug,
-      path: topic.path,
-      title: topic.title,
-      description: topic.description,
-      draft: topic.draft,
-      featured: topic.featured,
-      readingPath: topic.readingPath,
-      keyQuestions: topic.keyQuestions,
+async function saveTopicCategory(data, existingPath) {
+  const categories = await loadTopicCategories();
+  const oldSlug = existingPath?.startsWith("topic:") ? existingPath.slice("topic:".length) : "";
+  const slug = slugify(data.slug || data.title);
+
+  if (!slug) throw new Error("Topic requires a slug.");
+  if (!data.title) throw new Error("Topic requires a label.");
+  if (!data.description) throw new Error("Topic requires a description.");
+
+  const nextCategory = {
+    slug,
+    label: data.title,
+    description: data.description,
+    patterns: data.patterns.length > 0 ? data.patterns : [slug, data.title],
+  };
+  const existingIndex = categories.findIndex(category =>
+    oldSlug ? category.slug === oldSlug : category.slug === slug,
+  );
+  const nextCategories = [...categories];
+
+  if (existingIndex >= 0) {
+    nextCategories[existingIndex] = nextCategory;
+  } else {
+    nextCategories.push(nextCategory);
+  }
+
+  await writeFile(
+    topicCategoriesPath,
+    `${JSON.stringify({ categories: nextCategories }, null, 2)}\n`,
+    "utf8",
+  );
+
+  const items = addPostCategories(await listAllContent(), nextCategories);
+  return makeTopicSummaries(items, nextCategories).find(topic => topic.slug === slug);
+}
+
+function makeTopicSummaries(items, categories) {
+  const posts = items.filter(item => item.collection === "posts");
+
+  return categories
+    .map(category => ({
+      path: `topic:${category.slug}`,
+      gitPath: path.relative(rootDir, topicCategoriesPath),
+      collection: "topics",
+      slug: category.slug,
+      title: category.label,
+      description: category.description,
+      patterns: category.patterns,
+      draft: false,
+      featured: false,
+      body: "",
+      route: {
+        path: `topic:${category.slug}`,
+        publicPath: `/topics/${category.slug}/`,
+        publicUrl: `${siteUrl.replace(/\/+$/, "")}/topics/${encodeURIComponent(category.slug)}/`,
+        localPreviewUrl: `${localPreviewUrl.replace(/\/+$/, "")}/topics/${encodeURIComponent(category.slug)}/`,
+      },
       posts: posts
-        .filter(post => post.topics.includes(topic.slug))
+        .filter(post => post.category === category.slug)
         .map(post => ({
           path: post.path,
           title: post.title,
           date: post.date,
           draft: post.draft,
         })),
-      resources: resources
-        .filter(resource => resource.topics.includes(topic.slug))
-        .map(resource => ({
-          path: resource.path,
-          title: resource.title,
-          type: resource.resourceType,
-          draft: resource.draft,
-        })),
+      resources: [],
     }));
 }
 
-function addPostCategories(items) {
+function addPostCategories(items, categories) {
   return items.map(item =>
-    item.collection === "posts" ? { ...item, category: getPostCategory(item) } : item,
+    item.collection === "posts" ? { ...item, category: getPostCategory(item, categories) } : item,
   );
 }
 
-function makeCategoryFilters(items) {
+function makeCategoryFilters(items, categories) {
   const posts = items.filter(item => item.collection === "posts");
-  const categories = [
-    { slug: "ai", title: "AI" },
-    { slug: "systems", title: "Systems" },
-    { slug: "writing", title: "Writing" },
-    { slug: "planning", title: "Planning" },
-  ];
-
   return [
     { slug: "all", title: "All", count: posts.length },
     ...categories.map(category => ({
-      ...category,
+      slug: category.slug,
+      title: category.label,
       count: posts.filter(post => post.category === category.slug).length,
     })),
   ];
 }
 
-function getPostCategory(post) {
+function getPostCategory(post, categories = []) {
   const text = [
     post.title,
     post.description,
@@ -597,10 +655,11 @@ function getPostCategory(post) {
     .join(" ")
     .toLowerCase();
 
-  if (/llm|ai|大模型|推理|reasoning|compute/.test(text)) return "ai";
-  if (/system|systems|工程|架构|cloudflare|astro/.test(text)) return "systems";
-  if (/planning|规划|复盘|plan|人生/.test(text)) return "planning";
-  return "writing";
+  const matched = categories.find(category =>
+    category.patterns.some(pattern => text.includes(pattern.toLowerCase())),
+  );
+
+  return matched?.slug ?? categories.find(category => category.slug === "writing")?.slug ?? "writing";
 }
 
 function slugify(value) {

@@ -43,8 +43,8 @@ const elements = {
   topicNote: byId("topicNote"),
   topicSelect: byId("topicSelect"),
   topicDetailField: byId("topicDetailField"),
-  readingPath: byId("readingPath"),
-  keyQuestions: byId("keyQuestions"),
+  topicSlug: byId("topicSlug"),
+  topicPatterns: byId("topicPatterns"),
   resourceField: byId("resourceField"),
   resourceType: byId("resourceType"),
   resourceUrl: byId("resourceUrl"),
@@ -93,16 +93,16 @@ function wireEvents() {
     elements.lang,
     elements.date,
     elements.topicSelect,
-    elements.readingPath,
-    elements.keyQuestions,
+    elements.topicSlug,
+    elements.topicPatterns,
     elements.resourceType,
     elements.resourceUrl,
     elements.seriesPosts,
     elements.draft,
     elements.featured,
   ]) {
-    input.addEventListener("input", () => renderFromFields());
-    input.addEventListener("change", () => renderFromFields());
+    input.addEventListener("input", renderFromFields);
+    input.addEventListener("change", renderFromFields);
   }
 
   elements.markdownEditor.addEventListener("input", () => {
@@ -189,65 +189,7 @@ function syncActiveType() {
 }
 
 function syncModeCopy() {
-  const copy = {
-    posts: {
-      heading: "New Article",
-      hint: "文章是博客主体。写标题、描述、归属主题，正文在右侧 Markdown 编辑器里写。",
-      existingLabel: "Open Article",
-      existingNote: "选择已有文章继续编辑，或保持为空新建。",
-      titleLabel: "Title",
-      titleNote: "文章标题，也是新建文件名来源。",
-      descriptionLabel: "Description",
-      descriptionNote: "列表摘要、搜索结果和分享描述。",
-      basicLabel: "Basic",
-      basicNote: "文章需要语言和发布日期。",
-      topicLabel: "Topic",
-      topicNote: "选择文章归属的主题；首页会自动归类到对应主题按钮。",
-    },
-    topics: {
-      heading: "New Topic",
-      hint: "主题用于长期归类。这里可以看到现有主题、每个主题下的文章，并新增主题。",
-      existingLabel: "Topic Library",
-      existingNote: "打开已有主题编辑边界、阅读路径和关键问题。",
-      titleLabel: "Topic Name",
-      titleNote: "显示在博客首页主题按钮和主题页标题。",
-      descriptionLabel: "Boundary",
-      descriptionNote: "说明这个主题收集什么，不收集什么。",
-      basicLabel: "Language",
-      basicNote: "主题页语言，不需要日期。",
-      topicLabel: "Parent Topic",
-      topicNote: "",
-    },
-    series: {
-      heading: "New Series",
-      hint: "系列用于有顺序的学习路径。只有需要连续阅读时再创建。",
-      existingLabel: "Open Series",
-      existingNote: "打开已有系列，维护文章顺序。",
-      titleLabel: "Series Name",
-      titleNote: "系列页标题。",
-      descriptionLabel: "Series Goal",
-      descriptionNote: "说明这个系列解决什么问题，适合怎样阅读。",
-      basicLabel: "Language",
-      basicNote: "系列页语言，不需要日期。",
-      topicLabel: "Related Topic",
-      topicNote: "可选：把系列挂到一个主题下。",
-    },
-    resources: {
-      heading: "New Resource",
-      hint: "资源用于论文、书、工具和链接。它们是参考材料，不和文章混在一起。",
-      existingLabel: "Open Resource",
-      existingNote: "打开已有资源继续补充说明。",
-      titleLabel: "Resource Title",
-      titleNote: "资源名称，例如论文名、书名或工具名。",
-      descriptionLabel: "Why Keep It",
-      descriptionNote: "说明为什么值得收藏，以及和哪个问题有关。",
-      basicLabel: "Basic",
-      basicNote: "资源可以记录语言和日期。",
-      topicLabel: "Related Topic",
-      topicNote: "可选：把资源挂到一个主题下。",
-    },
-  }[state.collection];
-
+  const copy = modeCopy();
   elements.contentHeading.textContent = copy.heading;
   elements.contentHint.textContent = copy.hint;
   elements.existingLabel.textContent = copy.existingLabel;
@@ -262,11 +204,75 @@ function syncModeCopy() {
   elements.topicNote.textContent = copy.topicNote;
 }
 
+function modeCopy() {
+  const copies = {
+    posts: {
+      heading: "New Article",
+      hint: "文章是博客主体。选择一个主题分类，正文在右侧 Markdown 编辑器里写。",
+      existingLabel: "Open Article",
+      existingNote: "选择已有文章继续编辑，或保持为空新建。",
+      titleLabel: "Title",
+      titleNote: "文章标题，也是新建文件名来源。",
+      descriptionLabel: "Description",
+      descriptionNote: "列表摘要、搜索结果和分享描述。",
+      basicLabel: "Basic",
+      basicNote: "文章需要语言和发布日期。",
+      topicLabel: "Topic",
+      topicNote: "选择 AI / SYSTEMS / WRITING / PLANNING 这类主题。",
+    },
+    topics: {
+      heading: "New Topic",
+      hint: "主题就是博客首页那排分类按钮。这里管理 AI、SYSTEMS、WRITING、PLANNING 这类主题。",
+      existingLabel: "Topic Library",
+      existingNote: "打开已有主题分类，编辑显示名、slug、描述和匹配关键词。",
+      titleLabel: "Topic Label",
+      titleNote: "显示在博客首页主题按钮和 /topics 页面。",
+      descriptionLabel: "Topic Description",
+      descriptionNote: "说明这个主题分类包含什么内容。",
+      basicLabel: "Not Used",
+      basicNote: "主题分类不需要语言和日期。",
+      topicLabel: "",
+      topicNote: "",
+    },
+    series: {
+      heading: "New Series",
+      hint: "系列是有顺序的阅读路径，和主题分类是两种不同东西。",
+      existingLabel: "Open Series",
+      existingNote: "打开已有系列，维护文章顺序。",
+      titleLabel: "Series Name",
+      titleNote: "系列页标题。",
+      descriptionLabel: "Series Goal",
+      descriptionNote: "说明这个系列解决什么问题，适合怎样阅读。",
+      basicLabel: "Language",
+      basicNote: "系列页语言，不需要日期。",
+      topicLabel: "",
+      topicNote: "",
+    },
+    resources: {
+      heading: "New Resource",
+      hint: "资源是论文、书籍、工具和链接收藏，和主题分类不同。",
+      existingLabel: "Open Resource",
+      existingNote: "打开已有资源继续补充说明。",
+      titleLabel: "Resource Title",
+      titleNote: "资源名称，例如论文名、书名或工具名。",
+      descriptionLabel: "Why Keep It",
+      descriptionNote: "说明为什么值得收藏。",
+      basicLabel: "Basic",
+      basicNote: "资源可以记录语言和日期。",
+      topicLabel: "",
+      topicNote: "",
+    },
+  };
+
+  return copies[state.collection] ?? copies.posts;
+}
+
 function syncVisibility() {
-  elements.topicField.classList.toggle("is-hidden", state.collection === "topics");
+  elements.topicField.classList.toggle("is-hidden", state.collection !== "posts");
   elements.topicDetailField.classList.toggle("is-hidden", state.collection !== "topics");
   elements.seriesField.classList.toggle("is-hidden", state.collection !== "series");
   elements.resourceField.classList.toggle("is-hidden", state.collection !== "resources");
+  elements.basicField.classList.toggle("is-hidden", state.collection === "topics");
   elements.date.style.display = state.collection === "posts" || state.collection === "resources" ? "" : "none";
 }
 
@@ -287,7 +293,10 @@ function renderTopicStrip() {
 
 function renderExistingSelect() {
   const current = state.filePath;
-  const items = state.items.filter(item => item.collection === state.collection);
+  const items = state.collection === "topics"
+    ? state.topics
+    : state.items.filter(item => item.collection === state.collection);
+
   elements.existingSelect.innerHTML = "";
 
   const placeholder = document.createElement("option");
@@ -311,7 +320,7 @@ function renderTopicSelect() {
 
   const none = document.createElement("option");
   none.value = "";
-  none.textContent = "不关联主题";
+  none.textContent = "选择主题分类";
   elements.topicSelect.append(none);
 
   for (const topic of state.topics) {
@@ -354,7 +363,7 @@ function renderArticleOverview() {
       <span>${escapeHtml(label)} / ${posts.length} 篇</span>
     </div>
     <div class="overview-grid">
-      ${posts.length ? posts.map(renderMiniContentCard).join("") : `<div class="empty-note">这个主题下还没有文章。新建文章并选择该主题后，首页会自动归类。</div>`}
+      ${posts.length ? posts.map(renderMiniContentCard).join("") : `<div class="empty-note">这个主题分类下还没有文章。</div>`}
     </div>
   `;
 }
@@ -363,7 +372,7 @@ function renderTopicOverview() {
   elements.modeOverview.innerHTML = `
     <div class="overview-head">
       <h3>Topic Map</h3>
-      <span>主题会变成博客首页上方的筛选按钮</span>
+      <span>这些就是博客首页上方的主题按钮</span>
     </div>
     <div class="overview-grid">
       ${
@@ -372,7 +381,7 @@ function renderTopicOverview() {
               <article class="overview-card">
                 <div>
                   <strong>${escapeHtml(topic.title)}</strong>
-                  <div class="mini-meta">${escapeHtml(topic.slug)} / ${topic.posts.length} 篇文章 / ${topic.resources.length} 个资源</div>
+                  <div class="mini-meta">${escapeHtml(topic.slug)} / ${topic.posts.length} posts / keywords: ${escapeHtml((topic.patterns ?? []).join(", "))}</div>
                   <div class="pill-row">
                     ${
                       topic.posts.length
@@ -384,7 +393,7 @@ function renderTopicOverview() {
                 <button class="mini-action" type="button" data-open-path="${escapeHtml(topic.path)}">Open</button>
               </article>
             `).join("")
-          : `<div class="empty-note">还没有主题。先建一个主题，再给文章选择这个主题。</div>`
+          : `<div class="empty-note">还没有主题分类。新建 Topic 后会写入 src/data/topicCategories.json。</div>`
       }
     </div>
   `;
@@ -395,7 +404,7 @@ function renderSeriesOverview() {
   elements.modeOverview.innerHTML = `
     <div class="overview-head">
       <h3>Series Paths</h3>
-      <span>只有需要顺序阅读时才使用</span>
+      <span>系列只负责文章顺序，不属于主题分类</span>
     </div>
     <div class="overview-grid">
       ${
@@ -404,13 +413,13 @@ function renderSeriesOverview() {
               <article class="overview-card">
                 <div>
                   <strong>${escapeHtml(item.title)}</strong>
-                  <div class="mini-meta">${item.posts.length} 篇文章 / ${item.topics.map(topicTitle).join(", ") || "未关联主题"}</div>
+                  <div class="mini-meta">${item.posts.length} posts / ${escapeHtml(item.path)}</div>
                   <div class="pill-row">${item.posts.map(post => `<span class="mini-pill">${escapeHtml(post)}</span>`).join("") || `<span class="mini-pill">暂无顺序</span>`}</div>
                 </div>
                 <button class="mini-action" type="button" data-open-path="${escapeHtml(item.path)}">Open</button>
               </article>
             `).join("")
-          : `<div class="empty-note">还没有系列。系列适合课程式、路径式内容，不需要时可以不建。</div>`
+          : `<div class="empty-note">还没有系列。只有需要顺序阅读时才创建。</div>`
       }
     </div>
   `;
@@ -421,7 +430,7 @@ function renderResourceOverview() {
   elements.modeOverview.innerHTML = `
     <div class="overview-head">
       <h3>Resource Shelf</h3>
-      <span>论文、书籍、工具、链接和参考材料</span>
+      <span>资源是独立收藏，不属于主题分类</span>
     </div>
     <div class="overview-grid">
       ${
@@ -430,13 +439,13 @@ function renderResourceOverview() {
               <article class="overview-card">
                 <div>
                   <strong>${escapeHtml(item.title)}</strong>
-                  <div class="mini-meta">${escapeHtml(item.resourceType)} / ${item.topics.map(topicTitle).join(", ") || "未关联主题"}</div>
+                  <div class="mini-meta">${escapeHtml(item.resourceType)} / ${escapeHtml(item.url || item.path)}</div>
                   <div class="overview-note">${escapeHtml(item.description || "没有描述")}</div>
                 </div>
                 <button class="mini-action" type="button" data-open-path="${escapeHtml(item.path)}">Open</button>
               </article>
             `).join("")
-          : `<div class="empty-note">还没有资源。资源不会打扰文章列表，只在资源页和主题页里辅助阅读。</div>`
+          : `<div class="empty-note">还没有资源。资源用于论文、书、工具和链接。</div>`
       }
     </div>
   `;
@@ -444,12 +453,12 @@ function renderResourceOverview() {
 
 function renderMiniContentCard(item) {
   const status = item.draft ? "draft" : "ready";
-  const topics = item.topics.map(topicTitle).join(", ") || "未关联主题";
+  const topic = item.category ? filterTitle(item.category) : "未选择主题分类";
   return `
     <article class="overview-card">
       <div>
         <strong>${escapeHtml(item.title)}</strong>
-        <div class="mini-meta">${escapeHtml(status)} / ${escapeHtml(topics)} / ${escapeHtml(item.path)}</div>
+        <div class="mini-meta">${escapeHtml(status)} / ${escapeHtml(topic)} / ${escapeHtml(item.path)}</div>
         <div class="overview-note">${escapeHtml(item.description || "没有描述")}</div>
       </div>
       <button class="mini-action" type="button" data-open-path="${escapeHtml(item.path)}">Open</button>
@@ -473,8 +482,8 @@ function setDefaultContent(collection) {
   elements.lang.value = "zh";
   elements.date.value = today();
   elements.topicSelect.value = "";
-  elements.readingPath.value = "";
-  elements.keyQuestions.value = "";
+  elements.topicSlug.value = "";
+  elements.topicPatterns.value = "";
   elements.resourceType.value = "link";
   elements.resourceUrl.value = "";
   elements.seriesPosts.value = "";
@@ -495,11 +504,11 @@ async function openExisting(filePath) {
 
   elements.title.value = item.title;
   elements.description.value = item.description;
-  elements.lang.value = item.lang;
+  elements.lang.value = item.lang || "zh";
   elements.date.value = item.date || today();
-  elements.topicSelect.value = item.topics[0] ?? "";
-  elements.readingPath.value = (item.readingPath ?? []).join("\n");
-  elements.keyQuestions.value = (item.keyQuestions ?? []).join("\n");
+  elements.topicSelect.value = item.topics?.[0] ?? "";
+  elements.topicSlug.value = item.slug ?? "";
+  elements.topicPatterns.value = (item.patterns ?? []).join("\n");
   elements.resourceType.value = item.resourceType || "link";
   elements.resourceUrl.value = item.url || "";
   elements.seriesPosts.value = (item.posts ?? []).join("\n");
@@ -533,18 +542,18 @@ function inspectCurrent() {
   const warnings = [];
   const notes = [];
 
-  if (!data.title) errors.push("缺少标题，无法生成稳定文件名和页面标题。");
+  if (!data.title) errors.push("缺少标题，无法生成稳定标题。");
   if (!data.description) errors.push("缺少描述，列表、搜索和分享信息会不完整。");
 
   if (data.collection === "posts") {
     if (!data.date) errors.push("文章缺少发布日期。");
-    if (data.topics.length === 0) warnings.push("文章未选择主题，首页主题按钮不会收录它。");
+    if (data.topics.length === 0) warnings.push("文章未选择主题分类，首页主题按钮不会收录它。");
   }
 
   if (data.collection === "topics") {
-    if (data.readingPath.length === 0) warnings.push("主题还没有阅读路径；可以之后补。");
-    if (data.keyQuestions.length === 0) warnings.push("主题还没有关键问题；可以之后补。");
-    notes.push("主题保存后会出现在博客首页的主题筛选区。");
+    if (!data.slug && !data.title) errors.push("主题缺少 slug，无法生成 /topics 路径。");
+    if (data.patterns.length === 0) warnings.push("主题还没有匹配关键词；文章可能无法自动归类。");
+    notes.push("主题保存后会出现在博客首页筛选区和 /topics 页面。");
   }
 
   if (data.collection === "series" && data.posts.length === 0) {
@@ -555,7 +564,7 @@ function inspectCurrent() {
     warnings.push("该资源没有 URL；如果只是普通笔记，可以把类型改成 note。");
   }
 
-  if (data.draft) {
+  if (data.collection !== "topics" && data.draft) {
     warnings.push("Draft 已开启。保存可以，但线上博客默认不会展示；正式发布前请取消 Draft。");
   }
 
@@ -574,7 +583,7 @@ function inspectCurrent() {
     };
   }
 
-  if (data.draft) {
+  if (data.collection !== "topics" && data.draft) {
     return {
       kind: "draft",
       label: "DRAFT",
@@ -594,15 +603,15 @@ function inspectCurrent() {
 function currentData() {
   return {
     collection: state.collection,
+    slug: elements.topicSlug.value.trim(),
     title: elements.title.value.trim(),
     description: elements.description.value.trim(),
     lang: elements.lang.value,
     date: elements.date.value.trim() || today(),
-    topics: elements.topicSelect.value ? [elements.topicSelect.value] : [],
+    topics: state.collection === "posts" && elements.topicSelect.value ? [elements.topicSelect.value] : [],
     series: [],
     posts: splitLines(elements.seriesPosts.value),
-    readingPath: splitLines(elements.readingPath.value),
-    keyQuestions: splitLines(elements.keyQuestions.value),
+    patterns: splitLines(elements.topicPatterns.value),
     resourceType: elements.resourceType.value,
     url: elements.resourceUrl.value.trim(),
     draft: elements.draft.checked,
@@ -624,18 +633,15 @@ function frontmatter() {
     lines.push(`draft: ${data.draft}`);
     lines.push(`featured: ${data.featured}`);
   } else if (data.collection === "topics") {
-    lines.push(`featured: ${data.featured}`);
-    pushArray(lines, "readingPath", data.readingPath);
-    pushArray(lines, "keyQuestions", data.keyQuestions);
-    lines.push(`draft: ${data.draft}`);
+    lines.push(`slug: ${data.slug || slugify(data.title)}`);
+    lines.push(`label: "${escapeYaml(data.title)}"`);
+    pushArray(lines, "patterns", data.patterns);
   } else if (data.collection === "series") {
     pushArray(lines, "posts", data.posts);
-    pushArray(lines, "topics", data.topics);
     lines.push(`draft: ${data.draft}`);
   } else {
     lines.push(`type: ${data.resourceType}`);
     if (data.url) lines.push(`url: "${escapeYaml(data.url)}"`);
-    pushArray(lines, "topics", data.topics);
     lines.push(`date: ${data.date}`);
     lines.push(`draft: ${data.draft}`);
   }
@@ -656,6 +662,17 @@ function pushArray(lines, name, values) {
 
 function currentRoute() {
   const collection = state.collection;
+  if (collection === "topics") {
+    const slug = elements.topicSlug.value.trim() || slugify(elements.title.value);
+    const publicPath = `/topics/${slug || "untitled"}/`;
+    return {
+      path: `topic:${slug || "untitled"}`,
+      publicPath,
+      publicUrl: `${state.siteUrl.replace(/\/+$/, "")}${encodePublicPath(publicPath)}`,
+      localPreviewUrl: `${state.localPreviewUrl.replace(/\/+$/, "")}${encodePublicPath(publicPath)}`,
+    };
+  }
+
   const path = state.mode === "edit" && state.filePath
     ? state.filePath
     : `${collection}/${slugify(elements.title.value)}.md`;
@@ -678,7 +695,7 @@ async function save(action) {
     return;
   }
 
-  if (action === "publish" && elements.draft.checked) {
+  if (action === "publish" && state.collection !== "topics" && elements.draft.checked) {
     state.lastOutput = "当前仍是 Draft。请取消 Draft 后再发布，否则线上博客不会显示。";
     renderOutput();
     renderStatus();
@@ -723,7 +740,7 @@ function setBusy(value) {
 
 function defaultBody(collection) {
   if (collection === "topics") {
-    return ["这个主题用于长期收集同一类问题下的文章、资源和思考。", "", "## 主题说明", "", "说明这个主题为什么重要，以及它和其他主题的边界。", ""].join("\n");
+    return "";
   }
   if (collection === "series") {
     return ["## 系列说明", "", "说明这个系列适合怎样阅读，以及每篇文章之间的顺序关系。", "", "## 阅读顺序", "", "- ", ""].join("\n");
@@ -803,8 +820,7 @@ function today() {
 }
 
 function topicTitle(slug) {
-  if (!slug || slug === "all") return "All";
-  return state.topics.find(topic => topic.slug === slug)?.title ?? slug;
+  return filterTitle(slug);
 }
 
 function filterTitle(slug) {

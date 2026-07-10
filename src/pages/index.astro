@@ -7,23 +7,13 @@ import Footer from "@/components/Footer.astro";
 import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import { getSortedPosts } from "@/utils/getSortedPosts";
-import { filterPublicEntries } from "@/utils/researchLibrary";
+import { getTopicCategory, topicCategories } from "@/utils/topicCategories";
 import { getAssetPath } from "@/utils/withBase";
 import config from "@/config";
 
 const locale = Astro.currentLocale ?? config.site.lang;
 
 const posts = getSortedPosts((await getCollection("posts")).filter(postFilter));
-const topics = filterPublicEntries(await getCollection("topics")).sort((a, b) =>
-  a.data.title.localeCompare(b.data.title, locale)
-);
-const topicById = new Map(topics.map(topic => [topic.id, topic]));
-const topicCounts = new Map(
-  topics.map(topic => [
-    topic.id,
-    posts.filter(post => post.data.topics.includes(topic.id)).length,
-  ])
-);
 
 function getPostExcerpt(description: string) {
   const compact = description.replace(/\s+/g, " ").trim();
@@ -32,10 +22,11 @@ function getPostExcerpt(description: string) {
 
 const topicButtons = [
   { label: "All", value: "all", count: posts.length },
-  ...topics.map(topic => ({
-    label: topic.data.title,
-    value: topic.id,
-    count: topicCounts.get(topic.id) ?? 0,
+  ...topicCategories.map(category => ({
+    label: category.label,
+    value: category.slug,
+    count: posts.filter(post => getTopicCategory(post.data).slug === category.slug)
+      .length,
   })),
 ];
 
@@ -101,14 +92,11 @@ const formatDate = (date: Date) =>
         <div class="mag-post-list">
           {
             posts.map((post, index) => {
-              const primaryTopic = post.data.topics
-                .map(topic => topicById.get(topic))
-                .find(Boolean);
-              const primaryTopicLabel = primaryTopic?.data.title ?? "Article";
+              const primaryTopic = getTopicCategory(post.data);
               return (
                 <article
                   class="mag-post-item grid grid-cols-1 gap-4 py-6 sm:grid-cols-[9.5rem_1fr_7rem] sm:gap-6"
-                  data-topics={post.data.topics.join(" ")}
+                  data-topics={primaryTopic.slug}
                   data-visible-separator={
                     index < posts.length - 1 ? "true" : "false"
                   }
@@ -128,7 +116,7 @@ const formatDate = (date: Date) =>
                       {getPostExcerpt(post.data.description)}
                     </p>
                   </div>
-                  <span class="mag-tag">{primaryTopicLabel}</span>
+                  <span class="mag-tag">{primaryTopic.label}</span>
                 </article>
               );
             })

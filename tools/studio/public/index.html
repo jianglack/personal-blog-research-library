@@ -86,10 +86,10 @@
             </div>
 
             <div class="field is-hidden" id="topicDetailField">
-              <label><span>Topic Detail</span><span class="note">主题页会展示阅读路径和关键问题，便于长期维护。</span></label>
+              <label><span>Topic Setup</span><span class="note">主题分类用于首页筛选和 /topics 页面，不是 Markdown 文章。</span></label>
               <div class="stack">
-                <textarea id="readingPath" placeholder="阅读路径：每行一条"></textarea>
-                <textarea id="keyQuestions" placeholder="关键问题：每行一条"></textarea>
+                <input id="topicSlug" placeholder="slug: ai / systems / writing / planning" />
+                <textarea id="topicPatterns" placeholder="匹配关键词：每行一个，例如 AI、LLM、大模型"></textarea>
               </div>
             </div>
 
