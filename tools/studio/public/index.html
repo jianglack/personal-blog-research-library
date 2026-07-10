@@ -16,21 +16,26 @@
       <section class="hero">
         <div>
           <h1>Publish</h1>
-          <p>本地写作后台只负责编辑 Markdown、维护属性、检查和发布；线上博客仍然是完全静态页面。</p>
+          <p>本地博客写作台。文章和主题是核心；系列、资源作为可选扩展。正文直接写 Markdown，保存后进入 GitHub，Cloudflare 自动部署。</p>
         </div>
-        <div class="status-strip">
-          <div class="status"><span>Posts</span><strong id="countPosts">0</strong></div>
-          <div class="status"><span>Topics</span><strong id="countTopics">0</strong></div>
-          <div class="status"><span>Drafts</span><strong id="countDrafts">0</strong></div>
-          <div class="status"><span>Ready</span><strong id="countReady">0</strong></div>
+        <div class="metric-strip">
+          <div class="metric"><span>Posts</span><strong id="countPosts">0</strong></div>
+          <div class="metric"><span>Topics</span><strong id="countTopics">0</strong></div>
+          <div class="metric"><span>Drafts</span><strong id="countDrafts">0</strong></div>
+          <div class="metric"><span>Ready</span><strong id="countReady">0</strong></div>
         </div>
+      </section>
+
+      <section class="topic-bar" aria-label="博客首页主题筛选">
+        <div class="topic-bar-title">Blog Topics</div>
+        <div class="topic-strip" id="topicStrip"></div>
       </section>
 
       <section class="workspace">
         <div class="form-side">
           <div class="section-title">
-            <h2>New Content</h2>
-            <span class="hint">Markdown files stay in src/content</span>
+            <h2 id="contentHeading">New Article</h2>
+            <span class="hint" id="contentHint">文章是博客的主要内容，主题只负责归类和长期整理。</span>
           </div>
 
           <div class="content-picker">
@@ -43,9 +48,11 @@
             </div>
           </div>
 
+          <section class="mode-overview" id="modeOverview"></section>
+
           <form id="contentForm">
             <div class="field">
-              <label for="existingSelect">Open <span class="note">打开已有文章或主题继续编辑</span></label>
+              <label for="existingSelect"><span id="existingLabel">Open Article</span><span class="note" id="existingNote">选择已有文章继续编辑，或保持为空新建。</span></label>
               <div class="row open-row">
                 <select id="existingSelect"></select>
                 <button class="action" id="reloadBtn" type="button">Refresh</button>
@@ -53,17 +60,17 @@
             </div>
 
             <div class="field">
-              <label for="title">Title <span class="note">页面标题 / 文件名来源</span></label>
+              <label for="title"><span id="titleLabel">Title</span><span class="note" id="titleNote">页面标题，也是新建文件名来源。</span></label>
               <input id="title" autocomplete="off" />
             </div>
 
             <div class="field">
-              <label for="description">Description <span class="note">列表摘要、SEO 描述和搜索结果</span></label>
+              <label for="description"><span id="descriptionLabel">Description</span><span class="note" id="descriptionNote">列表摘要、搜索结果和分享描述。</span></label>
               <textarea id="description"></textarea>
             </div>
 
-            <div class="field">
-              <label>Basic <span class="note">文章式填写，不碰 YAML</span></label>
+            <div class="field" id="basicField">
+              <label><span id="basicLabel">Basic</span><span class="note" id="basicNote">文章式填写，不需要碰 YAML。</span></label>
               <div class="row">
                 <select id="lang">
                   <option value="zh">中文</option>
@@ -74,31 +81,41 @@
             </div>
 
             <div class="field" id="topicField">
-              <label for="topicSelect">Topic <span class="note">文章归属到哪个主题页</span></label>
+              <label for="topicSelect"><span id="topicLabel">Topic</span><span class="note" id="topicNote">选择文章归属的主题；首页会自动按主题归类。</span></label>
               <select id="topicSelect"></select>
             </div>
 
-            <div class="field is-hidden" id="resourceField">
-              <label for="resourceType">Resource <span class="note">paper / book / tool / link / note</span></label>
-              <div class="row">
-                <select id="resourceType">
-                  <option value="paper">paper</option>
-                  <option value="book">book</option>
-                  <option value="tool">tool</option>
-                  <option value="link">link</option>
-                  <option value="note">note</option>
-                </select>
-                <input id="resourceUrl" placeholder="https://..." />
+            <div class="field is-hidden" id="topicDetailField">
+              <label><span>Topic Detail</span><span class="note">主题页会展示阅读路径和关键问题，便于长期维护。</span></label>
+              <div class="stack">
+                <textarea id="readingPath" placeholder="阅读路径：每行一条"></textarea>
+                <textarea id="keyQuestions" placeholder="关键问题：每行一条"></textarea>
               </div>
             </div>
 
             <div class="field is-hidden" id="seriesField">
-              <label for="seriesPosts">Series Posts <span class="note">文章 slug，每行一个</span></label>
+              <label for="seriesPosts"><span>Series Order</span><span class="note">系列里包含的文章 slug，每行一个，按阅读顺序排列。</span></label>
               <textarea id="seriesPosts"></textarea>
             </div>
 
+            <div class="field is-hidden" id="resourceField">
+              <label for="resourceType"><span>Resource</span><span class="note">资源可归入主题，作为论文、书籍、工具或链接收藏。</span></label>
+              <div class="stack">
+                <div class="row">
+                  <select id="resourceType">
+                    <option value="paper">paper</option>
+                    <option value="book">book</option>
+                    <option value="tool">tool</option>
+                    <option value="link">link</option>
+                    <option value="note">note</option>
+                  </select>
+                  <input id="resourceUrl" placeholder="https://..." />
+                </div>
+              </div>
+            </div>
+
             <div class="field">
-              <label>Status <span class="note">发布前的基本状态</span></label>
+              <label>Status <span class="note">发布前的基本状态。</span></label>
               <div class="switch-row">
                 <label class="check"><input type="checkbox" id="draft" checked /> Draft</label>
                 <label class="check"><input type="checkbox" id="featured" /> Featured</label>
@@ -124,10 +141,19 @@
               <span>public</span><strong id="publicUrl">louisjiang.pages.dev/posts/untitled/</strong>
             </div>
           </div>
+
+          <div class="status-box" id="statusBox">
+            <div>
+              <span class="status-badge" id="statusBadge">DRAFT</span>
+              <strong id="statusTitle">当前内容还在草稿状态</strong>
+            </div>
+            <ul id="statusReasons"></ul>
+          </div>
+
           <div class="editor-wrap">
             <div class="editor-head">
               <span>markdown editor</span>
-              <span>frontmatter generated from left form</span>
+              <span>left form generates frontmatter</span>
             </div>
             <textarea id="markdownEditor" class="markdown-editor"></textarea>
           </div>
@@ -142,7 +168,7 @@
       <footer class="bottom-note">
         <span>no tag field</span>
         <span>article and topic are core</span>
-        <span>git push triggers Cloudflare Pages</span>
+        <span>series/resources are optional</span>
       </footer>
     </main>
 

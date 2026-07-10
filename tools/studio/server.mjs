@@ -50,32 +50,50 @@ const server = createServer(async (request, response) => {
   }
 });
 
-listen(defaultPort);
+listen(defaultPort).catch(error => {
+  throw error;
+});
 
-function listen(port) {
-  server.once("error", error => {
+async function listen(port) {
+  try {
+    const actualPort = await tryListen(port);
+    console.log(`Blog Studio running at http://127.0.0.1:${actualPort}/`);
+  } catch (error) {
     if (error && error.code === "EADDRINUSE" && port < defaultPort + 20) {
-      listen(port + 1);
+      await listen(port + 1);
       return;
     }
 
     throw error;
-  });
+  }
+}
 
-  server.listen(port, "127.0.0.1", () => {
-    console.log(`Blog Studio running at http://127.0.0.1:${port}/`);
+function tryListen(port) {
+  return new Promise((resolve, reject) => {
+    const onError = error => {
+      server.off("listening", onListening);
+      reject(error);
+    };
+    const onListening = () => {
+      server.off("error", onError);
+      resolve(port);
+    };
+
+    server.once("error", onError);
+    server.once("listening", onListening);
+    server.listen(port, "127.0.0.1");
   });
 }
 
 async function handleApi(request, response, url) {
   if (request.method === "GET" && url.pathname === "/api/content") {
-    const items = await listAllContent();
+    const items = addPostCategories(await listAllContent());
+    const topics = makeTopicSummaries(items);
     sendJson(response, 200, {
       ok: true,
       items,
-      topics: items
-        .filter(item => item.collection === "topics")
-        .map(item => ({ slug: item.slug, title: item.title })),
+      topics,
+      topicFilters: makeCategoryFilters(items),
       counts: makeCounts(items),
       siteUrl,
       localPreviewUrl,
@@ -231,7 +249,7 @@ function summarizeSource(filePath, source, includeBody = false) {
   const collection = getCollectionFromPath(filePath);
   const route = makeRoute({ ...data, collection }, filePath);
   const title = String(data.title ?? path.basename(filePath, path.extname(filePath)));
-  return {
+  const item = {
     path: filePath,
     collection,
     slug: path.basename(filePath, path.extname(filePath)),
@@ -239,9 +257,12 @@ function summarizeSource(filePath, source, includeBody = false) {
     description: String(data.description ?? ""),
     lang: data.lang === "en" ? "en" : "zh",
     date: String(data.date ?? ""),
+    tags: asStringArray(data.tags),
     topics: asStringArray(data.topics),
     series: asStringArray(data.series),
     posts: asStringArray(data.posts),
+    readingPath: asStringArray(data.readingPath),
+    keyQuestions: asStringArray(data.keyQuestions),
     resourceType: String(data.type ?? "link"),
     url: String(data.url ?? ""),
     draft: data.draft === true,
@@ -250,6 +271,12 @@ function summarizeSource(filePath, source, includeBody = false) {
     source: includeBody ? source : undefined,
     route,
   };
+
+  if (collection === "posts") {
+    item.category = getPostCategory(item);
+  }
+
+  return item;
 }
 
 function parseMarkdown(source) {
@@ -364,8 +391,8 @@ function buildFrontmatter(data) {
     return {
       ...common,
       featured: Boolean(data.featured),
-      readingPath: [],
-      keyQuestions: [],
+      readingPath: data.readingPath,
+      keyQuestions: data.keyQuestions,
     };
   }
 
@@ -397,6 +424,8 @@ function normalizeContentData(input = {}) {
     topics: asStringArray(input.topics),
     series: asStringArray(input.series),
     posts: asStringArray(input.posts),
+    readingPath: asStringArray(input.readingPath),
+    keyQuestions: asStringArray(input.keyQuestions),
     resourceType: String(input.resourceType ?? input.type ?? "link").trim() || "link",
     url: String(input.url ?? "").trim(),
     draft: input.draft === true,
@@ -493,9 +522,85 @@ function makeCounts(items) {
   return {
     posts: items.filter(item => item.collection === "posts").length,
     topics: items.filter(item => item.collection === "topics").length,
+    series: items.filter(item => item.collection === "series").length,
+    resources: items.filter(item => item.collection === "resources").length,
     drafts: items.filter(item => item.draft).length,
     ready: items.filter(item => !item.draft).length,
   };
+}
+
+function makeTopicSummaries(items) {
+  const posts = items.filter(item => item.collection === "posts");
+  const resources = items.filter(item => item.collection === "resources");
+
+  return items
+    .filter(item => item.collection === "topics")
+    .map(topic => ({
+      slug: topic.slug,
+      path: topic.path,
+      title: topic.title,
+      description: topic.description,
+      draft: topic.draft,
+      featured: topic.featured,
+      readingPath: topic.readingPath,
+      keyQuestions: topic.keyQuestions,
+      posts: posts
+        .filter(post => post.topics.includes(topic.slug))
+        .map(post => ({
+          path: post.path,
+          title: post.title,
+          date: post.date,
+          draft: post.draft,
+        })),
+      resources: resources
+        .filter(resource => resource.topics.includes(topic.slug))
+        .map(resource => ({
+          path: resource.path,
+          title: resource.title,
+          type: resource.resourceType,
+          draft: resource.draft,
+        })),
+    }));
+}
+
+function addPostCategories(items) {
+  return items.map(item =>
+    item.collection === "posts" ? { ...item, category: getPostCategory(item) } : item,
+  );
+}
+
+function makeCategoryFilters(items) {
+  const posts = items.filter(item => item.collection === "posts");
+  const categories = [
+    { slug: "ai", title: "AI" },
+    { slug: "systems", title: "Systems" },
+    { slug: "writing", title: "Writing" },
+    { slug: "planning", title: "Planning" },
+  ];
+
+  return [
+    { slug: "all", title: "All", count: posts.length },
+    ...categories.map(category => ({
+      ...category,
+      count: posts.filter(post => post.category === category.slug).length,
+    })),
+  ];
+}
+
+function getPostCategory(post) {
+  const text = [
+    post.title,
+    post.description,
+    ...(post.tags ?? []),
+    ...(post.topics ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (/llm|ai|大模型|推理|reasoning|compute/.test(text)) return "ai";
+  if (/system|systems|工程|架构|cloudflare|astro/.test(text)) return "systems";
+  if (/planning|规划|复盘|plan|人生/.test(text)) return "planning";
+  return "writing";
 }
 
 function slugify(value) {
@@ -517,9 +622,16 @@ function slugify(value) {
 function asStringArray(value) {
   if (Array.isArray(value)) return value.map(item => String(item)).filter(Boolean);
   if (typeof value === "string") {
-    return value
+    const text = value.trim();
+    const source = text.startsWith("[") && text.endsWith("]")
+      ? text.slice(1, -1)
+      : text;
+
+    return source
       .split(/[\n,，]/)
       .map(item => item.trim())
+      .map(item => item.replace(/^["']|["']$/g, ""))
+      .map(item => item.replace(/\\"/g, '"').replace(/\\\\/g, "\\"))
       .filter(Boolean);
   }
   return [];
