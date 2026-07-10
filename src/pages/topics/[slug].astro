@@ -19,13 +19,20 @@ export async function getStaticPaths() {
 }
 
 const { topic } = Astro.props;
+const formatDate = (date: Date) =>
+  date.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
 const posts = sortByDateDesc((await getCollection("posts")).filter(postFilter))
   .filter(post => post.data.topics.includes(topic.id))
   .map(post => ({
     href: getPostUrl(post.id, post.filePath, locale),
     title: post.data.title,
     description: post.data.description,
-    meta: post.data.tags.join(" / "),
+    meta: formatDate(post.data.pubDatetime),
   }));
 
 const resources = filterPublicEntries(await getCollection("resources"))
@@ -43,6 +50,17 @@ const resources = filterPublicEntries(await getCollection("resources"))
   description={topic.data.description}
   lang={topic.data.lang}
 >
+  <section class="mb-8 grid grid-cols-2 gap-3 text-sm">
+    <div class="border-border border p-4">
+      <p class="text-foreground/70">Posts</p>
+      <strong class="mt-2 block text-3xl">{posts.length}</strong>
+    </div>
+    <div class="border-border border p-4">
+      <p class="text-foreground/70">Resources</p>
+      <strong class="mt-2 block text-3xl">{resources.length}</strong>
+    </div>
+  </section>
+
   {
     topic.data.readingPath.length > 0 && (
       <section class="mb-8">

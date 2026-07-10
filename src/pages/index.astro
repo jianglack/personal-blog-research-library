@@ -7,58 +7,35 @@ import Footer from "@/components/Footer.astro";
 import { getPostUrl } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
 import { getSortedPosts } from "@/utils/getSortedPosts";
+import { filterPublicEntries } from "@/utils/researchLibrary";
 import { getAssetPath } from "@/utils/withBase";
 import config from "@/config";
 
 const locale = Astro.currentLocale ?? config.site.lang;
 
 const posts = getSortedPosts((await getCollection("posts")).filter(postFilter));
-
-function getPostCategory(post: (typeof posts)[number]) {
-  const text = [
-    post.data.title,
-    post.data.description,
-    ...post.data.tags,
-    ...post.data.topics,
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  if (/llm|ai|\u5927\u6a21\u578b|\u63a8\u7406|reasoning|compute/.test(text)) {
-    return "AI";
-  }
-  if (/system|systems|\u5de5\u7a0b|\u67b6\u6784|cloudflare|astro/.test(text)) {
-    return "Systems";
-  }
-  if (
-    /writing|\u8868\u8fbe|\u6f14\u8bb2|\u6c9f\u901a|\u535a\u5ba2|write/.test(
-      text
-    )
-  ) {
-    return "Writing";
-  }
-  if (/planning|\u89c4\u5212|\u590d\u76d8|plan/.test(text)) return "Planning";
-  return "Writing";
-}
+const topics = filterPublicEntries(await getCollection("topics")).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title, locale)
+);
+const topicById = new Map(topics.map(topic => [topic.id, topic]));
+const topicCounts = new Map(
+  topics.map(topic => [
+    topic.id,
+    posts.filter(post => post.data.topics.includes(topic.id)).length,
+  ])
+);
 
 function getPostExcerpt(description: string) {
   const compact = description.replace(/\s+/g, " ").trim();
   return compact.length > 116 ? `${compact.slice(0, 116).trim()}...` : compact;
 }
 
-const categories = ["AI", "Systems", "Writing", "Planning"] as const;
-const categoryCounts = Object.fromEntries(
-  categories.map(category => [
-    category,
-    posts.filter(post => getPostCategory(post) === category).length,
-  ])
-) as Record<(typeof categories)[number], number>;
-
 const topicButtons = [
-  { label: "All", count: posts.length },
-  ...categories.map(category => ({
-    label: category,
-    count: categoryCounts[category],
+  { label: "All", value: "all", count: posts.length },
+  ...topics.map(topic => ({
+    label: topic.data.title,
+    value: topic.id,
+    count: topicCounts.get(topic.id) ?? 0,
   })),
 ];
 
@@ -108,7 +85,7 @@ const formatDate = (date: Date) =>
               <button
                 type="button"
                 class="mag-topic-button mag-heavy"
-                data-topic-filter={topic.label}
+                data-topic-filter={topic.value}
                 data-active={index === 0 ? "true" : "false"}
               >
                 <span class="mag-topic-label">{topic.label}</span>
@@ -124,11 +101,14 @@ const formatDate = (date: Date) =>
         <div class="mag-post-list">
           {
             posts.map((post, index) => {
-              const primaryTag = getPostCategory(post);
+              const primaryTopic = post.data.topics
+                .map(topic => topicById.get(topic))
+                .find(Boolean);
+              const primaryTopicLabel = primaryTopic?.data.title ?? "Article";
               return (
                 <article
                   class="mag-post-item grid grid-cols-1 gap-4 py-6 sm:grid-cols-[9.5rem_1fr_7rem] sm:gap-6"
-                  data-topic={primaryTag}
+                  data-topics={post.data.topics.join(" ")}
                   data-visible-separator={
                     index < posts.length - 1 ? "true" : "false"
                   }
@@ -148,7 +128,7 @@ const formatDate = (date: Date) =>
                       {getPostExcerpt(post.data.description)}
                     </p>
                   </div>
-                  <span class="mag-tag">{primaryTag}</span>
+                  <span class="mag-tag">{primaryTopicLabel}</span>
                 </article>
               );
             })
@@ -174,11 +154,12 @@ const formatDate = (date: Date) =>
       "[data-topic-filter]"
     );
     const postList = document.querySelector<HTMLElement>(".mag-post-list");
-    const postItems = document.querySelectorAll<HTMLElement>("[data-topic]");
+    const postItems = document.querySelectorAll<HTMLElement>("[data-topics]");
 
     function updateVisiblePosts(filter: string) {
       postItems.forEach(item => {
-        const visible = filter === "All" || item.dataset.topic === filter;
+        const topics = (item.dataset.topics ?? "").split(/\s+/).filter(Boolean);
+        const visible = filter === "all" || topics.includes(filter);
         item.hidden = !visible;
         item.dataset.visibleSeparator = "false";
       });
@@ -193,11 +174,11 @@ const formatDate = (date: Date) =>
       });
     }
 
-    updateVisiblePosts("All");
+    updateVisiblePosts("all");
 
     filterButtons.forEach(button => {
       button.addEventListener("click", () => {
-        const filter = button.dataset.topicFilter ?? "All";
+        const filter = button.dataset.topicFilter ?? "all";
 
         filterButtons.forEach(item => {
           item.dataset.active = String(item === button);
