@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
+    "studio": "node tools/studio/server.mjs",
     "sync": "astro sync",
     "astro": "astro",
     "format:check": "prettier --check .",
