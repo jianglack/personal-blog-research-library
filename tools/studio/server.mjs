@@ -181,21 +181,40 @@ async function handleApi(request, response, url) {
     const relativeToRoot = saved.gitPath ?? path.relative(rootDir, path.join(contentDir, saved.path));
     const branch = (await runCommand("git", ["branch", "--show-current"])).stdout.trim() || "master";
     const commitMessage = `content: publish ${saved.title}`;
-    const git = await runCommands([
-      ["git", ["add", "--", relativeToRoot]],
-      ["git", ["diff", "--cached", "--quiet"], { allowFailure: true }],
-    ]);
+    const git = await runCommands([["git", ["add", "--", relativeToRoot]]]);
+    if (!git.ok) {
+      sendJson(response, 200, {
+        ok: false,
+        item: saved,
+        output: `${check.output}\n${git.output}`,
+        error: "Git add failed.",
+      });
+      return;
+    }
 
-    if (git.output.includes("exit 1")) {
+    const diff = await runCommand("git", ["diff", "--cached", "--quiet", "--", relativeToRoot]);
+    const diffOutput = `$ git diff --cached --quiet -- ${relativeToRoot}\n${diff.stdout}${diff.stderr}\n`;
+
+    if (diff.code === 1) {
       const publish = await runCommands([
-        ["git", ["commit", "-m", commitMessage]],
+        ["git", ["commit", "-m", commitMessage, "--", relativeToRoot]],
         ["git", ["push", "origin", branch]],
       ]);
       sendJson(response, 200, {
         ok: publish.ok,
         item: saved,
-        output: `${check.output}\n${publish.output}`,
+        output: `${check.output}\n${git.output}${diffOutput}${publish.output}`,
         error: publish.ok ? undefined : "Git publish failed.",
+      });
+      return;
+    }
+
+    if (diff.code !== 0) {
+      sendJson(response, 200, {
+        ok: false,
+        item: saved,
+        output: `${check.output}\n${git.output}${diffOutput}`,
+        error: "Git diff failed.",
       });
       return;
     }
@@ -203,7 +222,7 @@ async function handleApi(request, response, url) {
     sendJson(response, 200, {
       ok: true,
       item: saved,
-      output: `${check.output}\nNo content changes to commit.`,
+      output: `${check.output}\n${git.output}${diffOutput}No content changes to commit for ${relativeToRoot}.`,
     });
     return;
   }
