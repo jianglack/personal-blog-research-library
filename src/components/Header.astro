@@ -23,6 +23,8 @@ const isActive = (path: string) => {
 
 const navLinks = [
   { text: "Posts", href: "", activePath: "/" },
+  { text: "Series", href: "series", activePath: "/series" },
+  { text: "Resources", href: "resources", activePath: "/resources" },
   ...(config.features.search !== false
     ? [{ text: "Search", href: "search", activePath: "/search" }]
     : []),
