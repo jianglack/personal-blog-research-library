@@ -1,8 +1,9 @@
 ---
 import { getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import ContentList from "@/components/ContentList.astro";
-import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
 import config from "@/config";
 import { filterPublicEntries } from "@/utils/researchLibrary";
 
@@ -11,13 +12,46 @@ const series = filterPublicEntries(await getCollection("series")).map(item => ({
   href: getRelativeLocaleUrl(locale, `series/${item.id}`),
   title: item.data.title,
   description: item.data.description,
-  meta: `${item.data.posts.length} 篇文章`,
+  meta: `${item.data.posts.length} ${item.data.posts.length === 1 ? "post" : "posts"}`,
 }));
+
+const pageTitle = `Series | ${config.site.title}`;
+const pageDescription = "Ordered reading paths and long-form note sequences.";
 ---
 
-<ResearchLibraryLayout
-  title="系列"
-  description="有明确顺序的学习路径和长文笔记序列。"
->
-  <ContentList items={series} emptyText="还没有系列。" />
-</ResearchLibraryLayout>
+<Layout title={pageTitle} description={pageDescription}>
+  <Header />
+
+  <main id="main-content" class="app-layout">
+    <div class="mag-frame">
+      <section class="px-5 py-7 sm:px-6 sm:py-9">
+        <h1 class="mag-section-title mag-heavy">Series</h1>
+        <p class="mb-6 text-sm leading-6 text-(--mag-muted)">
+          {pageDescription}
+        </p>
+
+        <div class="mag-library-list">
+          {
+            series.length > 0 ? (
+              series.map(item => (
+                <article class="mag-library-item">
+                  <div>
+                    <a class="mag-library-title" href={item.href}>
+                      {item.title}
+                    </a>
+                    <p class="mag-library-description">{item.description}</p>
+                  </div>
+                  <span class="mag-tag">{item.meta}</span>
+                </article>
+              ))
+            ) : (
+              <p class="mag-library-empty">No series yet.</p>
+            )
+          }
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

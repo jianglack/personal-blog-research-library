@@ -205,6 +205,48 @@ body {
   border-bottom: 1px solid var(--mag-ink);
 }
 
+.mag-library-list {
+  border-top: 1px solid var(--mag-ink);
+}
+
+.mag-library-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--mag-ink);
+  padding: 1.375rem 0;
+}
+
+.mag-library-item:last-child {
+  border-bottom: 0;
+}
+
+.mag-library-title {
+  color: var(--mag-ink);
+  font-size: clamp(1.55rem, 3vw, 2.375rem);
+  font-weight: 400;
+  line-height: 1.08;
+  text-decoration: none;
+}
+
+.mag-library-title:hover {
+  color: var(--mag-ink);
+  text-decoration: none;
+}
+
+.mag-library-description,
+.mag-library-empty {
+  margin-top: 0.5rem;
+  max-width: 42rem;
+  color: var(--mag-muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.mag-library-empty {
+  padding: 1.375rem 0;
+}
+
 .mag-tag {
   justify-self: end;
   align-self: start;
@@ -242,5 +284,10 @@ body {
 
   .mag-tag {
     justify-self: start;
+  }
+
+  .mag-library-item {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 }

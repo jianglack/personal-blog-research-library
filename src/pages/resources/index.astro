@@ -1,28 +1,63 @@
 ---
 import { getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import ContentList from "@/components/ContentList.astro";
-import ResearchLibraryLayout from "@/layouts/ResearchLibraryLayout.astro";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
 import config from "@/config";
 import { filterPublicEntries } from "@/utils/researchLibrary";
 
 const locale = Astro.currentLocale ?? config.site.lang;
-const formatResourceMeta = (type: string, tags: string[]) =>
-  [type, ...tags].join(" / ");
+const formatResourceMeta = (type: string) => type;
 
 const resources = filterPublicEntries(await getCollection("resources")).map(
   resource => ({
     href: getRelativeLocaleUrl(locale, `resources/${resource.id}`),
     title: resource.data.title,
     description: resource.data.description,
-    meta: formatResourceMeta(resource.data.type, resource.data.tags),
+    meta: formatResourceMeta(resource.data.type),
   })
 );
+
+const pageTitle = `Resources | ${config.site.title}`;
+const pageDescription = "Books, papers, tools, links, and reference notes.";
 ---
 
-<ResearchLibraryLayout
-  title="资源"
-  description="论文、书籍、工具、链接和参考笔记。"
->
-  <ContentList items={resources} emptyText="还没有资源。" />
-</ResearchLibraryLayout>
+<Layout title={pageTitle} description={pageDescription}>
+  <Header />
+
+  <main id="main-content" class="app-layout">
+    <div class="mag-frame">
+      <section class="px-5 py-7 sm:px-6 sm:py-9">
+        <h1 class="mag-section-title mag-heavy">Resources</h1>
+        <p class="mb-6 text-sm leading-6 text-(--mag-muted)">
+          {pageDescription}
+        </p>
+
+        <div class="mag-library-list">
+          {
+            resources.length > 0 ? (
+              resources.map(resource => (
+                <article class="mag-library-item">
+                  <div>
+                    <a class="mag-library-title" href={resource.href}>
+                      {resource.title}
+                    </a>
+                    <p class="mag-library-description">
+                      {resource.description}
+                    </p>
+                  </div>
+                  <span class="mag-tag">{resource.meta}</span>
+                </article>
+              ))
+            ) : (
+              <p class="mag-library-empty">No resources yet.</p>
+            )
+          }
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
