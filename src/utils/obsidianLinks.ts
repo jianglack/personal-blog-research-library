@@ -120,7 +120,6 @@ function parseWikiText(
 function buildObsidianLinkMap(contentRoot = path.join(process.cwd(), "src", "content")) {
   const links: Record<string, string> = {};
 
-  addCollectionLinks(links, path.join(contentRoot, "topics"), "topics");
   addCollectionLinks(links, path.join(contentRoot, "series"), "series");
   addCollectionLinks(links, path.join(contentRoot, "resources"), "resources");
   addCollectionLinks(links, path.join(contentRoot, "posts"), "posts", true);

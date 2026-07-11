@@ -1,13 +1,9 @@
 ---
-import { getRelativeLocaleUrl } from "astro:i18n";
-import config from "@/config";
-
 interface Props {
   topics: string[];
 }
 
 const { topics } = Astro.props;
-const locale = Astro.currentLocale ?? config.site.lang;
 ---
 
 {
@@ -15,12 +11,9 @@ const locale = Astro.currentLocale ?? config.site.lang;
     <ul class="flex flex-wrap gap-2">
       {topics.map(topic => (
         <li>
-          <a
-            class="border-border hover:bg-muted/75 rounded border px-2 py-1 text-xs"
-            href={getRelativeLocaleUrl(locale, `topics/${topic}`)}
-          >
+          <span class="border-border rounded border px-2 py-1 text-xs">
             {topic}
-          </a>
+          </span>
         </li>
       ))}
     </ul>
